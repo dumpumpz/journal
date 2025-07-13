@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My 2025 Journal</title>
+  <style>
+    :root {
+      --primary: #5a3a22;
+      --secondary: #794f30;
+      --paper: #fffaf0;
+      --bg: #f0e8d9;
+      --text: #333;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: Georgia, serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+      min-height: 100vh;
+    }
+
+    .journal-page {
+      width: 100%;
+      max-width: 600px;
+      background: var(--paper);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    .date-header {
+      font-family: 'Courier New', monospace;
+      font-size: 1.2em;
+      color: #555;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+      margin: 0 0 10px 0;
+      word-break: break-word;
+    }
+
+    textarea {
+      flex-grow: 1;
+      width: 100%;
+      min-height: 50vh;
+      font-size: 1em;
+      font-family: Georgia, serif;
+      border: none;
+      background: transparent;
+      resize: none;
+      outline: none;
+      line-height: 1.6;
+      color: var(--text);
+      box-sizing: border-box;
+    }
+
+    .page-number {
+      margin-top: 10px;
+      font-size: 0.9em;
+      text-align: right;
+      color: #888;
+    }
+
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1.1em;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+      transition: background 0.3s;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--secondary);
+    }
+
+    button:disabled {
+      background: #a99484;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 500px) {
+      textarea {
+        font-size: 1em;
+        min-height: 60vh;
+      }
+
+      .journal-page {
+        padding: 15px;
+      }
+
+      button {
+        width: 100px;
+        font-size: 1em;
+        padding: 8px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="journal-page">
+    <h2 class="date-header" id="dateHeader">Loading...</h2>
+    <textarea id="entryBox" placeholder="Write your journal entry..."></textarea>
+    <div class="page-number" id="pageNumber"></div>
+  </div>
+
+  <div class="controls">
+    <button id="prevBtn">‹ Prev</button>
+    <button id="nextBtn">Next ›</button>
+  </div>
+
+  <script>
+    const YEAR = 2025;
+    const TOTAL_DAYS = ((YEAR % 4 === 0 && YEAR % 100 !== 0) || (YEAR % 400 === 0)) ? 366 : 365;
+
+    const dateHeader = document.getElementById('dateHeader');
+    const entryBox = document.getElementById('entryBox');
+    const pageNumber = document.getElementById('pageNumber');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    let currentDay = 1;
+
+    function getStorageKey(day) {
+      return `journal-${YEAR}-day-${day}`;
+    }
+
+    function getLocKey() {
+      return `journal-${YEAR}-last-opened`;
+    }
+
+    function saveEntry() {
+      localStorage.setItem(getStorageKey(currentDay), entryBox.value);
+      localStorage.setItem(getLocKey(), currentDay);
+    }
+
+    function loadEntry(day) {
+      return localStorage.getItem(getStorageKey(day)) || '';
+    }
+
+    function updatePage() {
+      const date = new Date(YEAR, 0, currentDay);
+      const dateStr = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      dateHeader.textContent = dateStr;
+      pageNumber.textContent = `Day ${currentDay} of ${TOTAL_DAYS}`;
+      entryBox.value = loadEntry(currentDay);
+      prevBtn.disabled = currentDay <= 1;
+      nextBtn.disabled = currentDay >= TOTAL_DAYS;
+    }
+
+    function goNext() {
+      if (currentDay < TOTAL_DAYS) {
+        currentDay++;
+        updatePage();
+      }
+    }
+
+    function goPrev() {
+      if (currentDay > 1) {
+        currentDay--;
+        updatePage();
+      }
+    }
+
+    function init() {
+      const saved = parseInt(localStorage.getItem(getLocKey()), 10);
+      const today = new Date();
+      const start = new Date(YEAR, 0, 1);
+      const dayOfYear = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1;
+      currentDay = (!isNaN(saved)) ? saved : (today.getFullYear() === YEAR ? dayOfYear : 1);
+      updatePage();
+    }
+
+    prevBtn.addEventListener('click', () => {
+      saveEntry();
+      goPrev();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      saveEntry();
+      goNext();
+    });
+
+    entryBox.addEventListener('input', () => {
+      saveEntry(); // auto-save while typing
+    });
+
+    init();
+  </script>
+</body>
+</html>

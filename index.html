@@ -10,51 +10,61 @@
     *, *:before, *:after { box-sizing: inherit; }
     html, body { overflow-x: hidden; }
 
+    /* Root and Theme variables are unchanged */
     :root {
-      --paper: #f5f5f5;
-      --bg: #e4e9ed;
-      --text: #333;
-      --text-light: #555;
-      --border-color: #d1d1d1;
-      --accent: #b48ead;
-      --shadow: rgba(0,0,0,0.1);
+      --paper: #f5f5f5; --bg: #e4e9ed; --text: #333; --text-light: #555; --border-color: #d1d1d1; --accent: #b48ead; --shadow: rgba(0,0,0,0.1);
     }
     [data-theme="dark"] {
-      --paper: #282c34;
-      --bg: #21252b;
-      --text: #d8dee9;
-      --text-light: #abb2bf;
-      --border-color: #4c566a;
-      --accent: #88c0d0;
-      --shadow: rgba(0,0,0,0.2);
+      --paper: #282c34; --bg: #21252b; --text: #d8dee9; --text-light: #abb2bf; --border-color: #4c566a; --accent: #88c0d0; --shadow: rgba(0,0,0,0.2);
     }
+    
+    /* Body and Main styles are unchanged */
     body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Georgia', serif; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
     main { width: 100%; max-width: 600px; background: var(--paper); padding: 25px; border-radius: 8px; box-shadow: 0 4px 20px var(--shadow); display: flex; flex-direction: column; gap: 25px; transition: opacity 0.2s ease-in-out; }
     main.journal-page--loading { opacity: 0; }
+    
+    /* Header and dailyLog styles are unchanged */
     .date-header { text-align: center; font-family: 'Courier New', monospace; font-size: 1.2em; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin: 0 0 10px 0; }
     #dailyLog { width: 100%; min-height: 150px; font-size: 1.1em; line-height: 1.7; font-family: inherit; border: none; background: transparent; resize: vertical; outline: none; color: var(--text); padding: 0; overflow-y: hidden; }
+    
+    /* Prompt section styles are unchanged */
     .prompts, .trackers-section { border-top: 1px dashed var(--border-color); padding-top: 20px; }
     .prompt-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
     .prompt-group label { font-weight: bold; color: var(--text-light); font-size: 1em; font-family: sans-serif; }
-    .prompt-group input[type="text"] { font-family: inherit; font-size: 1.05em; padding: 8px; border: 1px solid var(--border-color); background: var(--bg); border-radius: 4px; color: var(--text); }
-    .prompt-group input[type="text"]:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+
+    /* --- CHANGE: Updated styles to target textarea instead of input --- */
+    .prompt-group textarea {
+      font-family: inherit;
+      font-size: 1.05em;
+      line-height: 1.6;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg);
+      border-radius: 4px;
+      color: var(--text);
+      resize: none; /* Disable manual resizing */
+      overflow-y: hidden; /* Critical for auto-grow */
+    }
+    .prompt-group textarea:focus {
+      outline: 2px solid var(--accent);
+      border-color: var(--accent);
+    }
+    
+    /* All other styles are unchanged */
     .mood-trackers { display: flex; flex-direction: column; gap: 15px; }
     .mood-tracker { display: flex; align-items: center; gap: 10px; }
     .mood-tracker .label-container { flex-basis: 160px; font-size: 1.1em; display: flex; align-items: center; gap: 8px;}
     .mood-emoji { font-size: 1.2em; display: inline-block; width: 24px; text-align: center;}
     .mood-tracker select { flex-grow: 1; font-size: 1em; padding: 5px; border-radius: 4px; border: 1px solid var(--border-color); background-color: var(--paper); color: var(--text); }
     footer { font-size: 0.9em; text-align: right; color: #888; margin-top: 10px; }
-    
     .controls { margin-top: 20px; display: flex; gap: 16px; justify-content: center; align-items: center; }
     button { background: var(--accent); color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer; transition: background 0.3s, opacity 0.3s; font-family: sans-serif; }
     button:hover:not(:disabled) { opacity: 0.85; }
     button:disabled { background: #999; opacity: 0.7; cursor: not-allowed; }
     [data-theme="dark"] button:disabled { background: #555; }
     .theme-toggle { position: fixed; top: 10px; right: 10px; font-size: 0.9em; z-index: 10; }
-    
     .settings-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-light); padding: 8px; line-height: 1; font-size: 1.2em; }
     .settings-btn:hover { background: var(--bg); color: var(--text); }
-    
     .settings-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .settings-menu { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 300px; background: var(--paper); padding: 20px; border-radius: 8px; z-index: 101; opacity: 0; pointer-events: none; transition: opacity 0.3s ease, transform 0.3s ease; display: flex; flex-direction: column; gap: 15px; }
     .settings-menu.is-open, .settings-backdrop.is-open { opacity: 1; pointer-events: auto; }
@@ -73,14 +83,17 @@
     <section class="prompts">
         <div class="prompt-group">
             <label for="goal">🎯 Morning Goal</label>
-            <input type="text" id="goal" placeholder="What's your #1 objective for today?">
+            <!-- --- CHANGE: Converted from input to textarea --- -->
+            <textarea id="goal" rows="1" placeholder="What's your #1 objective for today?"></textarea>
         </div>
         <div class="prompt-group">
             <label for="eveningNote">📝 End-of-Day Thoughts</label>
-            <input type="text" id="eveningNote" placeholder="A note on how the day went...">
+            <!-- --- CHANGE: Converted from input to textarea --- -->
+            <textarea id="eveningNote" rows="1" placeholder="A note on how the day went..."></textarea>
         </div>
     </section>
 
+    <!-- The rest of the HTML is unchanged -->
     <section class="trackers-section">
       <div class="mood-trackers">
         <div class="mood-tracker">
@@ -122,208 +135,53 @@
   </div>
 
 <script>
+// The JavaScript does not require any changes for this to work,
+// thanks to the robust event handling already in place.
 const app = {
   YEAR: 2025,
   currentDay: 1,
   dom: {},
   config: {},
   
-  init() {
-    this.TOTAL_DAYS = ((this.YEAR % 4 === 0 && this.YEAR % 100 !== 0) || (this.YEAR % 400 === 0)) ? 366 : 365;
-    this.cacheDom();
-    this.initConfig();
-    this.bindEvents();
-    this.loadTheme();
-    this.loadInitialPage();
-  },
-  
-  cacheDom() {
-    this.dom = {
-      mainPage: document.getElementById('journalPage'),
-      dateHeader: document.getElementById('dateHeader'),
-      pageNumber: document.getElementById('pageNumber'),
-      prevBtn: document.getElementById('prevBtn'),
-      nextBtn: document.getElementById('nextBtn'),
-      themeToggle: document.getElementById('themeToggle'),
-      
-      settingsBtn: document.getElementById('settingsBtn'),
-      settingsMenu: document.getElementById('settingsMenu'),
-      settingsBackdrop: document.getElementById('settingsBackdrop'),
-      
-      downloadBtn: document.getElementById('downloadBackup'),
-      uploadBtn: document.getElementById('uploadBackup'),
-      loadBtn: document.getElementById('loadBackup'),
-      
-      textareas: document.querySelectorAll('textarea'),
-      moodSelectors: document.querySelectorAll('.mood-tracker select'),
-    };
-  },
-  
-  initConfig() {
-    this.config = {
-      dailyLog:      { type: 'value', el: document.getElementById('dailyLog') },
-      goal:          { type: 'value', el: document.getElementById('goal') },
-      eveningNote:   { type: 'value', el: document.getElementById('eveningNote') },
-      morningMood:   { type: 'value', el: document.getElementById('morningMood') },
-      afternoonMood: { type: 'value', el: document.getElementById('afternoonMood') },
-      eveningMood:   { type: 'value', el: document.getElementById('eveningMood') },
-    };
-  },
-  
-  bindEvents() {
-    this.dom.prevBtn.addEventListener('click', () => this.navigate(-1));
-    this.dom.nextBtn.addEventListener('click', () => this.navigate(1));
-    this.dom.themeToggle.addEventListener('click', () => this.toggleTheme());
-    
-    this.dom.mainPage.addEventListener('input', (e) => { if (e.target.id && this.config[e.target.id]) { this.saveState(); if(e.target.tagName === 'TEXTAREA') this.autoGrow(e.target); } });
-    this.dom.mainPage.addEventListener('change', (e) => { if (e.target.tagName === 'SELECT') { this.saveState(); this.updateMoodEmoji(e.target); } });
-
-    this.dom.downloadBtn.addEventListener('click', () => this.downloadBackup());
-    this.dom.loadBtn.addEventListener('click', () => this.dom.uploadBtn.click());
-    this.dom.uploadBtn.addEventListener('change', (e) => this.loadBackup(e));
-
-    this.dom.settingsBtn.addEventListener('click', () => this.openSettings());
-    this.dom.settingsBackdrop.addEventListener('click', () => this.closeSettings());
-  },
-  
-  openSettings() {
-    this.dom.settingsMenu.classList.add('is-open');
-    this.dom.settingsBackdrop.classList.add('is-open');
-  },
-  closeSettings() {
-    this.dom.settingsMenu.classList.remove('is-open');
-    this.dom.settingsBackdrop.classList.remove('is-open');
-  },
-
-  getStorageKey(day, key) { return `journal-v6-${this.YEAR}-day-${day}-${key}`; },
-  
-  saveState() {
-    try {
-      for (const [key, field] of Object.entries(this.config)) {
-        localStorage.setItem(this.getStorageKey(this.currentDay, key), field.el[field.type]);
-      }
-      localStorage.setItem('journal-v6-last-opened', this.currentDay);
-    } catch (e) { console.error("Failed to save state.", e); }
-  },
-  
-  loadState() {
-    for (const [key, field] of Object.entries(this.config)) {
-      const value = localStorage.getItem(this.getStorageKey(this.currentDay, key));
-      field.el[field.type] = value || (field.type === 'checked' ? false : '');
-    }
-  },
-  
-  updatePageUI() {
-    this.dom.dateHeader.textContent = new Date(this.YEAR, 0, this.currentDay).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-    this.dom.pageNumber.textContent = `Day ${this.currentDay} / ${this.TOTAL_DAYS}`;
-    this.loadState();
-    this.dom.textareas.forEach(el => this.autoGrow(el));
-    this.dom.moodSelectors.forEach(el => this.updateMoodEmoji(el));
-    this.dom.prevBtn.disabled = this.currentDay <= 1;
-    this.dom.nextBtn.disabled = this.currentDay >= this.TOTAL_DAYS;
-  },
-  
-  navigate(direction) {
-    if ((direction === -1 && this.currentDay <= 1) || (direction === 1 && this.currentDay >= this.TOTAL_DAYS)) { return; }
-    this.saveState();
-    this.dom.mainPage.classList.add('journal-page--loading');
-    setTimeout(() => {
-      this.currentDay += direction;
-      this.updatePageUI();
-      this.dom.mainPage.classList.remove('journal-page--loading');
-    }, 200);
-  },
-  
-  loadInitialPage() {
-    const saved = parseInt(localStorage.getItem('journal-v6-last-opened'), 10);
-    const today = new Date();
-    const start = new Date(this.YEAR, 0, 1);
-    const dayOfYear = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1;
-    let initialDay = (today.getFullYear() === this.YEAR) ? dayOfYear : 1;
-    this.currentDay = !isNaN(saved) ? saved : initialDay;
-    this.updatePageUI();
-  },
-
-  autoGrow(element) { if (!element) return; element.style.height = 'auto'; element.style.height = (element.scrollHeight) + 'px'; },
-  
-  updateMoodEmoji(selectElement) {
-    const emojiSpan = document.getElementById(`${selectElement.id}Emoji`);
-    if (!emojiSpan) return;
-    const selectedOption = selectElement.options[selectElement.selectedIndex];
-    emojiSpan.textContent = selectedOption.dataset.emoji || '';
-  },
-  
-  toggleTheme() {
-    const isDark = document.documentElement.hasAttribute('data-theme');
-    if (isDark) {
-      document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('journal-theme', 'light');
-      this.dom.themeToggle.textContent = '🌙';
-    } else {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('journal-theme', 'dark');
-      this.dom.themeToggle.textContent = '☀️';
-    }
-  },
-  
-  loadTheme() {
-    if (localStorage.getItem('journal-theme') === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      this.dom.themeToggle.textContent = '☀️';
-    } else {
-      this.dom.themeToggle.textContent = '🌙';
-    }
-  },
-
-  downloadBackup() {
-    const data = {};
-    for (let i = 1; i <= this.TOTAL_DAYS; i++) {
-      const dayData = {}; let hasData = false;
-      for (const key of Object.keys(this.config)) {
-        const value = localStorage.getItem(this.getStorageKey(i, key));
-        if (value !== null && value !== '') { dayData[key] = value; hasData = true; }
-      }
-      if (hasData) { data[`day-${i}`] = dayData; }
-    }
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `journal-backup-${this.YEAR}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    this.closeSettings();
-  },
-
-  loadBackup(e) {
-    const file = e.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const data = JSON.parse(event.target.result);
-        if (!confirm('This will overwrite existing data. Are you sure?')) {
-          e.target.value = ''; // Reset file input
-          return;
-        }
-        for (const [dayKey, dayData] of Object.entries(data)) {
-          const day = dayKey.split('-')[1];
-          for (const [fieldKey, value] of Object.entries(dayData)) {
-            if (this.config[fieldKey]) localStorage.setItem(this.getStorageKey(day, fieldKey), value);
-          }
-        }
-        alert('Backup loaded successfully!');
-        this.updatePageUI();
-        this.closeSettings();
-      } catch (error) {
-        alert('Failed to load backup file. It might be corrupted.');
-        console.error(error);
-      } finally {
-        e.target.value = ''; // Reset file input
-      }
-    };
-    reader.readAsText(file);
-  }
+  init() { /* ... unchanged ... */ },
+  cacheDom() { /* ... unchanged ... */ },
+  initConfig() { /* ... unchanged ... */ },
+  bindEvents() { /* ... unchanged ... */ },
+  openSettings() { /* ... unchanged ... */ },
+  closeSettings() { /* ... unchanged ... */ },
+  getStorageKey(day, key) { /* ... unchanged ... */ },
+  saveState() { /* ... unchanged ... */ },
+  loadState() { /* ... unchanged ... */ },
+  updatePageUI() { /* ... unchanged ... */ },
+  navigate(direction) { /* ... unchanged ... */ },
+  loadInitialPage() { /* ... unchanged ... */ },
+  autoGrow(element) { /* ... unchanged ... */ },
+  updateMoodEmoji(selectElement) { /* ... unchanged ... */ },
+  toggleTheme() { /* ... unchanged ... */ },
+  loadTheme() { /* ... unchanged ... */ },
+  downloadBackup() { /* ... unchanged ... */ },
+  loadBackup(e) { /* ... unchanged ... */ }
 };
+
+// Full JS functions for completeness
+app.init = function() { this.TOTAL_DAYS = ((this.YEAR % 4 === 0 && this.YEAR % 100 !== 0) || (this.YEAR % 400 === 0)) ? 366 : 365; this.cacheDom(); this.initConfig(); this.bindEvents(); this.loadTheme(); this.loadInitialPage(); };
+app.cacheDom = function() { this.dom = { mainPage: document.getElementById('journalPage'), dateHeader: document.getElementById('dateHeader'), pageNumber: document.getElementById('pageNumber'), prevBtn: document.getElementById('prevBtn'), nextBtn: document.getElementById('nextBtn'), themeToggle: document.getElementById('themeToggle'), settingsBtn: document.getElementById('settingsBtn'), settingsMenu: document.getElementById('settingsMenu'), settingsBackdrop: document.getElementById('settingsBackdrop'), downloadBtn: document.getElementById('downloadBackup'), uploadBtn: document.getElementById('uploadBackup'), loadBtn: document.getElementById('loadBackup'), textareas: document.querySelectorAll('textarea'), moodSelectors: document.querySelectorAll('.mood-tracker select'), }; };
+app.initConfig = function() { this.config = { dailyLog: { type: 'value', el: document.getElementById('dailyLog') }, goal: { type: 'value', el: document.getElementById('goal') }, eveningNote: { type: 'value', el: document.getElementById('eveningNote') }, morningMood: { type: 'value', el: document.getElementById('morningMood') }, afternoonMood: { type: 'value', el: document.getElementById('afternoonMood') }, eveningMood: { type: 'value', el: document.getElementById('eveningMood') }, }; };
+app.bindEvents = function() { this.dom.prevBtn.addEventListener('click', () => this.navigate(-1)); this.dom.nextBtn.addEventListener('click', () => this.navigate(1)); this.dom.themeToggle.addEventListener('click', () => this.toggleTheme()); this.dom.mainPage.addEventListener('input', (e) => { if (e.target.id && this.config[e.target.id]) { this.saveState(); if(e.target.tagName === 'TEXTAREA') this.autoGrow(e.target); } }); this.dom.mainPage.addEventListener('change', (e) => { if (e.target.tagName === 'SELECT') { this.saveState(); this.updateMoodEmoji(e.target); } }); this.dom.downloadBtn.addEventListener('click', () => this.downloadBackup()); this.dom.loadBtn.addEventListener('click', () => this.dom.uploadBtn.click()); this.dom.uploadBtn.addEventListener('change', (e) => this.loadBackup(e)); this.dom.settingsBtn.addEventListener('click', () => this.openSettings()); this.dom.settingsBackdrop.addEventListener('click', () => this.closeSettings()); };
+app.openSettings = function() { this.dom.settingsMenu.classList.add('is-open'); this.dom.settingsBackdrop.classList.add('is-open'); };
+app.closeSettings = function() { this.dom.settingsMenu.classList.remove('is-open'); this.dom.settingsBackdrop.classList.remove('is-open'); };
+app.getStorageKey = function(day, key) { return `journal-v6-${this.YEAR}-day-${day}-${key}`; };
+app.saveState = function() { try { for (const [key, field] of Object.entries(this.config)) { localStorage.setItem(this.getStorageKey(this.currentDay, key), field.el[field.type]); } localStorage.setItem('journal-v6-last-opened', this.currentDay); } catch (e) { console.error("Failed to save state.", e); } };
+app.loadState = function() { for (const [key, field] of Object.entries(this.config)) { const value = localStorage.getItem(this.getStorageKey(this.currentDay, key)); field.el[field.type] = value || (field.type === 'checked' ? false : ''); } };
+app.updatePageUI = function() { this.dom.dateHeader.textContent = new Date(this.YEAR, 0, this.currentDay).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }); this.dom.pageNumber.textContent = `Day ${this.currentDay} / ${this.TOTAL_DAYS}`; this.loadState(); this.dom.textareas.forEach(el => this.autoGrow(el)); this.dom.moodSelectors.forEach(el => this.updateMoodEmoji(el)); this.dom.prevBtn.disabled = this.currentDay <= 1; this.dom.nextBtn.disabled = this.currentDay >= this.TOTAL_DAYS; };
+app.navigate = function(direction) { if ((direction === -1 && this.currentDay <= 1) || (direction === 1 && this.currentDay >= this.TOTAL_DAYS)) { return; } this.saveState(); this.dom.mainPage.classList.add('journal-page--loading'); setTimeout(() => { this.currentDay += direction; this.updatePageUI(); this.dom.mainPage.classList.remove('journal-page--loading'); }, 200); };
+app.loadInitialPage = function() { const saved = parseInt(localStorage.getItem('journal-v6-last-opened'), 10); const today = new Date(); const start = new Date(this.YEAR, 0, 1); const dayOfYear = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1; let initialDay = (today.getFullYear() === this.YEAR) ? dayOfYear : 1; this.currentDay = !isNaN(saved) ? saved : initialDay; this.updatePageUI(); };
+app.autoGrow = function(element) { if (!element) return; element.style.height = 'auto'; element.style.height = (element.scrollHeight) + 'px'; };
+app.updateMoodEmoji = function(selectElement) { const emojiSpan = document.getElementById(`${selectElement.id}Emoji`); if (!emojiSpan) return; const selectedOption = selectElement.options[selectElement.selectedIndex]; emojiSpan.textContent = selectedOption.dataset.emoji || ''; };
+app.toggleTheme = function() { const isDark = document.documentElement.hasAttribute('data-theme'); if (isDark) { document.documentElement.removeAttribute('data-theme'); localStorage.setItem('journal-theme', 'light'); this.dom.themeToggle.textContent = '🌙'; } else { document.documentElement.setAttribute('data-theme', 'dark'); localStorage.setItem('journal-theme', 'dark'); this.dom.themeToggle.textContent = '☀️'; } };
+app.loadTheme = function() { if (localStorage.getItem('journal-theme') === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); this.dom.themeToggle.textContent = '☀️'; } else { this.dom.themeToggle.textContent = '🌙'; } };
+app.downloadBackup = function() { const data = {}; for (let i = 1; i <= this.TOTAL_DAYS; i++) { const dayData = {}; let hasData = false; for (const key of Object.keys(this.config)) { const value = localStorage.getItem(this.getStorageKey(i, key)); if (value !== null && value !== '') { dayData[key] = value; hasData = true; } } if (hasData) { data[`day-${i}`] = dayData; } } const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `journal-backup-${this.YEAR}.json`; a.click(); URL.revokeObjectURL(url); this.closeSettings(); };
+app.loadBackup = function(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (event) => { try { const data = JSON.parse(event.target.result); if (!confirm('This will overwrite existing data. Are you sure?')) { e.target.value = ''; return; } for (const [dayKey, dayData] of Object.entries(data)) { const day = dayKey.split('-')[1]; for (const [fieldKey, value] of Object.entries(dayData)) { if (this.config[fieldKey]) localStorage.setItem(this.getStorageKey(day, fieldKey), value); } } alert('Backup loaded successfully!'); this.updatePageUI(); this.closeSettings(); } catch (error) { alert('Failed to load backup file. It might be corrupted.'); console.error(error); } finally { e.target.value = ''; } }; reader.readAsText(file); };
 
 app.init();
 </script>

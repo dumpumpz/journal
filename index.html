@@ -12,6 +12,7 @@
       --bg: #e4e9ed;
       --text: #333;
       --border-color: #ccc;
+      --label-color: #555;
     }
     [data-theme="dark"] {
       --primary: #88c0d0;
@@ -20,75 +21,110 @@
       --bg: #21252b;
       --text: #d8dee9;
       --border-color: #4c566a;
+      --label-color: #a0a0a0;
     }
     body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; min-height: 100vh; transition: background 0.3s, color 0.3s; }
-    .journal-page { width: 100%; max-width: 600px; background: var(--paper); padding: 20px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 20px; }
-    .date-header { text-align: center; font-family: 'Courier New', monospace; font-size: 1.2em; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin: 0 0 10px 0; }
+    main { width: 100%; max-width: 600px; background: var(--paper); padding: 20px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 25px; }
+    header { text-align: center; }
+    .date-header { font-family: 'Courier New', monospace; font-size: 1.2em; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin: 0; }
     
-    h2 { font-size: 1.3em; margin: 0; padding-bottom: 5px; border-bottom: 2px solid var(--primary); color: var(--primary); }
+    h2 { font-size: 1.3em; margin: 0 0 15px 0; padding-bottom: 5px; border-bottom: 2px solid var(--primary); color: var(--primary); }
+    
+    /* NEW: Input Group for Labels and Textareas */
+    .input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+    .input-group label { font-weight: bold; color: var(--label-color); font-size: 1em; }
+
     textarea {
       width: 100%;
+      box-sizing: border-box;
       font-size: 1.1em;
       line-height: 1.6;
       font-family: inherit;
-      border: 1px solid transparent;
+      border: 1px solid var(--border-color); /* Subtle border for clarity */
+      border-radius: 4px;
       background: transparent;
       resize: none;
       outline: none;
       color: var(--text);
-      padding: 0;
-      min-height: 90px;
+      padding: 8px;
       overflow-y: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
-    textarea:focus { border-color: transparent; }
+    textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent); }
 
-    .page-number { font-size: 0.9em; text-align: right; color: #888; margin-top: 10px; }
-    .controls { margin-top: 20px; display: flex; gap: 16px; justify-content: center; }
+    footer { font-size: 0.9em; text-align: right; color: #888; margin-top: 10px; }
+    .controls { margin-top: 20px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
     button { background: var(--primary); color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer; transition: background 0.3s; }
     button:hover:not(:disabled) { background: var(--secondary); }
     button:disabled { background: #a99484; cursor: not-allowed; }
     .theme-toggle { position: fixed; top: 10px; right: 10px; font-size: 0.9em; z-index: 10; }
 
     /* Compact Trackers */
-    .trackers { display: flex; justify-content: space-around; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; }
-    [data-theme="dark"] .trackers { background: rgba(255,255,255,0.05); }
-    .tracker-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .trackers { display: flex; justify-content: space-around; background: color-mix(in srgb, var(--bg) 50%, var(--paper)); padding: 15px; border-radius: 8px; }
+    .tracker-group { display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .tracker-group label { font-weight: bold; font-size: 0.9em; }
-    .tracker-group select, .tracker-group input { font-size: 0.9em; }
+    .tracker-group select { font-size: 0.9em; }
+    
+    /* NEW: Better Habit Tracker Styling */
+    .habit-list { display: flex; gap: 15px; align-items: center; }
+    .habit { display: flex; align-items: center; gap: 5px; cursor: pointer;}
+    .habit label { cursor: pointer; font-weight: normal; }
+
   </style>
 </head>
 <body>
   <button class="theme-toggle" id="themeToggle">🌙</button>
-  <div class="journal-page">
-    <h1 class="date-header" id="dateHeader">Loading...</h1>
+  
+  <main class="journal-page">
+    <header>
+      <h1 class="date-header" id="dateHeader">Loading...</h1>
+    </header>
     
-    <div>
-      <h2>☀️ Morning Plan</h2>
-      <textarea id="morningPlan" placeholder="🎯 Today's #1 Goal: ...
-🗓️ Key Tasks: ...
-🙏 Intention: ..."></textarea>
-    </div>
+    <section aria-labelledby="morning-plan-heading">
+      <h2 id="morning-plan-heading">☀️ Morning Plan</h2>
+      <div class="input-group">
+        <label for="goal">🎯 Today's #1 Goal</label>
+        <textarea id="goal" rows="1" placeholder="What is the one thing that will make today a success?"></textarea>
+      </div>
+      <div class="input-group">
+        <label for="tasks">🗓️ Key Tasks</label>
+        <textarea id="tasks" rows="2" placeholder="- Task 1
+- Task 2"></textarea>
+      </div>
+      <div class="input-group">
+        <label for="intention">🙏 Intention</label>
+        <textarea id="intention" rows="1" placeholder="e.g., focused, present, patient"></textarea>
+      </div>
+    </section>
 
-    <div class="trackers">
+    <section class="trackers" aria-label="Daily Trackers">
       <div class="tracker-group">
         <label for="mood">Mood</label>
         <select id="mood"><option value="">Select</option><option>⚡️ High Energy</option><option>😊 Good</option><option>😐 Okay</option><option>📉 Low Energy</option></select>
       </div>
       <div class="tracker-group">
         <label>Habits</label>
-        <div>
-          <input type="checkbox" id="habit1" title="Habit 1"><input type="checkbox" id="habit2" title="Habit 2"><input type="checkbox" id="habit3" title="Habit 3">
+        <div class="habit-list">
+          <div class="habit"><input type="checkbox" id="habit-meditate"><label for="habit-meditate">Meditate</label></div>
+          <div class="habit"><input type="checkbox" id="habit-workout"><label for="habit-workout">Workout</label></div>
+          <div class="habit"><input type="checkbox" id="habit-read"><label for="habit-read">Read</label></div>
         </div>
       </div>
-    </div>
+    </section>
     
-    <div>
-      <h2>🌙 Evening Review</h2>
-      <textarea id="eveningReview" placeholder="✅ Outcome & Lesson Learned: ..."></textarea>
-    </div>
+    <section aria-labelledby="evening-review-heading">
+      <h2 id="evening-review-heading">🌙 Evening Review</h2>
+      <div class="input-group">
+        <label for="eveningReview">✅ Outcome & Lesson Learned</label>
+        <textarea id="eveningReview" rows="3" placeholder="How did the day go? What was the key takeaway?"></textarea>
+      </div>
+    </section>
     
-    <div class="page-number" id="pageNumber"></div>
-  </div>
+    <footer>
+      <p class="page-number" id="pageNumber"></p>
+    </footer>
+  </main>
+
   <div class="controls">
     <button id="prevBtn">‹ Prev</button>
     <button id="nextBtn">Next ›</button>
@@ -110,10 +146,10 @@ const app = {
   init() {
     this.TOTAL_DAYS = ((this.YEAR % 4 === 0 && this.YEAR % 100 !== 0) || (this.YEAR % 400 === 0)) ? 366 : 365;
     this.cacheDom();
-    this.initConfig();
+    this.initConfig(); // Configuration is now much clearer
     this.bindEvents();
-    this.loadInitialPage();
     this.loadTheme();
+    this.loadInitialPage();
   },
   
   cacheDom() {
@@ -127,14 +163,20 @@ const app = {
     this.dom.loadBtn = document.getElementById('loadBackup');
   },
   
+  // --- CHANGE: Updated config to match new, separated fields ---
   initConfig() {
       this.config = {
-          morningPlan:   { type: 'value', el: document.getElementById('morningPlan') },
-          eveningReview: { type: 'value', el: document.getElementById('eveningReview') },
+          // Morning Plan
+          goal:          { type: 'value', el: document.getElementById('goal') },
+          tasks:         { type: 'value', el: document.getElementById('tasks') },
+          intention:     { type: 'value', el: document.getElementById('intention') },
+          // Trackers
           mood:          { type: 'value', el: document.getElementById('mood') },
-          habit1:        { type: 'checked', el: document.getElementById('habit1') },
-          habit2:        { type: 'checked', el: document.getElementById('habit2') },
-          habit3:        { type: 'checked', el: document.getElementById('habit3') },
+          'habit-meditate': { type: 'checked', el: document.getElementById('habit-meditate') },
+          'habit-workout':  { type: 'checked', el: document.getElementById('habit-workout') },
+          'habit-read':     { type: 'checked', el: document.getElementById('habit-read') },
+          // Evening Review
+          eveningReview: { type: 'value', el: document.getElementById('eveningReview') },
       };
   },
   
@@ -147,24 +189,27 @@ const app = {
     this.dom.uploadBtn.addEventListener('change', (e) => this.loadBackup(e));
     
     Object.values(this.config).forEach(field => {
-        field.el.addEventListener('input', () => this.saveState());
+      // Use 'change' for select/checkbox for better performance
+      const eventType = (field.el.tagName === 'SELECT' || field.el.type === 'checkbox') ? 'change' : 'input';
+      field.el.addEventListener(eventType, () => this.saveState());
     });
+
     document.querySelectorAll('textarea').forEach(el => {
         el.addEventListener('input', () => this.autoGrow(el));
+        // Also run on focus in case content is loaded
+        el.addEventListener('focus', () => this.autoGrow(el));
     });
   },
   
-  getStorageKey(day, key) { return `journal-v2-${this.YEAR}-day-${day}-${key}`; },
+  getStorageKey(day, key) { return `journal-v3-${this.YEAR}-day-${day}-${key}`; },
   
   saveState() {
     try {
       for (const [key, field] of Object.entries(this.config)) {
         localStorage.setItem(this.getStorageKey(this.currentDay, key), field.el[field.type]);
       }
-      localStorage.setItem('journal-v2-last-opened', this.currentDay);
-    } catch (e) {
-      console.error("Failed to save state.", e);
-    }
+      localStorage.setItem('journal-v3-last-opened', this.currentDay);
+    } catch (e) { console.error("Failed to save state.", e); }
   },
   
   loadState() {
@@ -173,7 +218,14 @@ const app = {
       if (value !== null) {
         field.el[field.type] = field.type === 'checked' ? value === 'true' : value;
       } else {
-        field.el[field.type] = field.type === 'checked' ? false : '';
+        // Clear fields for new day
+        if (field.type === 'checked') {
+            field.el.checked = false;
+        } else if (field.el.tagName === 'SELECT') {
+            field.el.value = '';
+        } else {
+            field.el.value = '';
+        }
       }
     }
   },
@@ -181,9 +233,12 @@ const app = {
   updatePage() {
     const date = new Date(this.YEAR, 0, this.currentDay);
     this.dom.dateHeader.textContent = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-    this.dom.pageNumber.textContent = `Day ${this.currentDay}`;
+    this.dom.pageNumber.textContent = `Day ${this.currentDay} / ${this.TOTAL_DAYS}`;
     this.loadState();
-    document.querySelectorAll('textarea').forEach(this.autoGrow);
+    // Use a timeout to ensure content is loaded before resizing
+    setTimeout(() => {
+        document.querySelectorAll('textarea').forEach(this.autoGrow);
+    }, 0);
     this.dom.prevBtn.disabled = this.currentDay <= 1;
     this.dom.nextBtn.disabled = this.currentDay >= this.TOTAL_DAYS;
   },
@@ -198,11 +253,18 @@ const app = {
   },
   
   loadInitialPage() {
-    const saved = parseInt(localStorage.getItem('journal-v2-last-opened'), 10);
+    const saved = parseInt(localStorage.getItem('journal-v3-last-opened'), 10);
     const today = new Date();
     const start = new Date(this.YEAR, 0, 1);
     const dayOfYear = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1;
-    this.currentDay = !isNaN(saved) ? saved : (today.getFullYear() === this.YEAR ? dayOfYear : 1);
+    
+    let initialDay = 1;
+    if (today.getFullYear() === this.YEAR) {
+        initialDay = dayOfYear;
+    }
+    // Prefer last opened day unless it's a new year
+    this.currentDay = !isNaN(saved) ? saved : initialDay;
+
     this.updatePage();
   },
 
@@ -216,20 +278,71 @@ const app = {
     if (isDark) {
       document.documentElement.removeAttribute('data-theme');
       localStorage.setItem('journal-theme', 'light');
+      this.dom.themeToggle.textContent = '🌙';
     } else {
       document.documentElement.setAttribute('data-theme', 'dark');
       localStorage.setItem('journal-theme', 'dark');
+      this.dom.themeToggle.textContent = '☀️';
     }
   },
   
   loadTheme() {
     if (localStorage.getItem('journal-theme') === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
+      this.dom.themeToggle.textContent = '☀️';
+    } else {
+      this.dom.themeToggle.textContent = '🌙';
     }
   },
 
-  downloadBackup() { /* ... unchanged ... */ },
-  loadBackup(e) { /* ... unchanged ... */ }
+  downloadBackup() {
+      const data = {};
+      for (let i = 1; i <= this.TOTAL_DAYS; i++) {
+          const dayData = {};
+          let hasData = false;
+          for (const key of Object.keys(this.config)) {
+              const value = localStorage.getItem(this.getStorageKey(i, key));
+              if (value !== null) {
+                  dayData[key] = value;
+                  hasData = true;
+              }
+          }
+          if (hasData) {
+              data[`day-${i}`] = dayData;
+          }
+      }
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `journal-backup-${this.YEAR}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+  },
+
+  loadBackup(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+          try {
+              const data = JSON.parse(event.target.result);
+              if (!confirm('This will overwrite existing data. Are you sure?')) return;
+              for (const [dayKey, dayData] of Object.entries(data)) {
+                  const day = dayKey.split('-')[1];
+                  for (const [fieldKey, value] of Object.entries(dayData)) {
+                      localStorage.setItem(this.getStorageKey(day, fieldKey), value);
+                  }
+              }
+              alert('Backup loaded successfully!');
+              this.updatePage(); // Refresh current page with loaded data
+          } catch (error) {
+              alert('Failed to load backup file. It might be corrupted.');
+              console.error(error);
+          }
+      };
+      reader.readAsText(file);
+  }
 };
 app.init();
 </script>

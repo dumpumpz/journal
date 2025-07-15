@@ -10,41 +10,48 @@
     *, *:before, *:after { box-sizing: inherit; }
     html, body { overflow-x: hidden; }
 
-    /* --- CHANGE: Updated Color Schemes --- */
+    /* Color Schemes are unchanged from previous edit */
     :root {
-      /* Easy-on-the-eyes "Paper" theme for day mode */
-      --paper: #FBF6EF; /* Soft, almost-white cream */
-      --bg: #F0EADE; /* Slightly darker "linen" background */
-      --text: #4a4a4a; /* Dark charcoal, not pure black */
-      --text-light: #7a7a7a; /* Medium grey */
-      --border-color: #dcd6cc; /* Subtle border matching the theme */
-      --accent: #8A9A5B; /* Muted, earthy "Moss Green" */
-      --shadow: rgba(0,0,0,0.08);
+      --paper: #FBF6EF; --bg: #F0EADE; --text: #4a4a4a; --text-light: #7a7a7a; --border-color: #dcd6cc; --accent: #8A9A5B; --shadow: rgba(0,0,0,0.08);
     }
     [data-theme="dark"] {
-      /* True black dark mode */
-      --paper: #1c1c1c; /* Very dark grey, just off black */
-      --bg: #000000; /* True black */
-      --text: #e2e2e2; /* Light grey, not pure white */
-      --text-light: #9e9e9e; /* Dimmer grey for labels */
-      --border-color: #3a3a3a; /* Visible but not jarring border */
-      --accent: #4682B4; /* "Steel Blue" that pops on black */
-      --shadow: rgba(0,0,0,0.4);
+      --paper: #1c1c1c; --bg: #000000; --text: #e2e2e2; --text-light: #9e9e9e; --border-color: #3a3a3a; --accent: #4682B4; --shadow: rgba(0,0,0,0.4);
     }
     
-    /* Body and Main styles are unchanged */
-    body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Georgia', serif; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
-    main { width: 100%; max-width: 600px; background: var(--paper); padding: 25px; border-radius: 8px; box-shadow: 0 4px 20px var(--shadow); display: flex; flex-direction: column; gap: 25px; transition: opacity 0.2s ease-in-out; }
+    /* --- CHANGE: Updated body font and main container spacing --- */
+    body { 
+      margin: 0; 
+      background: var(--bg); 
+      color: var(--text); 
+      /* Use a clean, modern system font stack instead of Georgia */
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      padding: 20px; 
+      min-height: 100vh; 
+    }
+    main { 
+      width: 100%; 
+      max-width: 600px; 
+      background: var(--paper); 
+      padding: 25px; 
+      border-radius: 8px; 
+      box-shadow: 0 4px 20px var(--shadow); 
+      display: flex; 
+      flex-direction: column; 
+      /* Reduced gap from 25px to 20px for tighter spacing */
+      gap: 20px; 
+      transition: opacity 0.2s ease-in-out; 
+    }
     main.journal-page--loading { opacity: 0; }
     
-    /* Header and dailyLog styles are unchanged */
-    .date-header { text-align: center; font-family: 'Courier New', monospace; font-size: 1.2em; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin: 0 0 10px 0; }
+    .date-header { text-align: center; font-family: 'Courier New', monospace; font-size: 1.2em; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin: 0; }
     #dailyLog { width: 100%; min-height: 150px; font-size: 1.1em; line-height: 1.7; font-family: inherit; border: none; background: transparent; resize: vertical; outline: none; color: var(--text); padding: 0; overflow-y: hidden; }
     
-    /* Prompt section styles are unchanged */
     .prompts, .trackers-section { border-top: 1px dashed var(--border-color); padding-top: 20px; }
     .prompt-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-    .prompt-group label { font-weight: bold; color: var(--text-light); font-size: 1em; font-family: sans-serif; }
+    .prompt-group label { font-weight: bold; color: var(--text-light); font-size: 1em; } /* Removed redundant font-family */
 
     .prompt-group textarea {
       font-family: inherit;
@@ -63,15 +70,14 @@
       border-color: var(--accent);
     }
     
-    /* All other styles are unchanged */
     .mood-trackers { display: flex; flex-direction: column; gap: 15px; }
     .mood-tracker { display: flex; align-items: center; gap: 10px; }
     .mood-tracker .label-container { flex-basis: 160px; font-size: 1.1em; display: flex; align-items: center; gap: 8px;}
     .mood-emoji { font-size: 1.2em; display: inline-block; width: 24px; text-align: center;}
-    .mood-tracker select { flex-grow: 1; font-size: 1em; padding: 5px; border-radius: 4px; border: 1px solid var(--border-color); background-color: var(--paper); color: var(--text); }
+    .mood-tracker select { flex-grow: 1; font-size: 1em; padding: 5px; border-radius: 4px; border: 1px solid var(--border-color); background-color: var(--paper); color: var(--text); font-family: inherit; }
     footer { font-size: 0.9em; text-align: right; color: #888; margin-top: 10px; }
     .controls { margin-top: 20px; display: flex; gap: 16px; justify-content: center; align-items: center; }
-    button { background: var(--accent); color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer; transition: background 0.3s, opacity 0.3s; font-family: sans-serif; }
+    button { background: var(--accent); color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer; transition: background 0.3s, opacity 0.3s; font-family: inherit; }
     button:hover:not(:disabled) { opacity: 0.85; }
     button:disabled { background: #999; opacity: 0.7; cursor: not-allowed; }
     [data-theme="dark"] button:disabled { background: #555; }
@@ -81,7 +87,7 @@
     .settings-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .settings-menu { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 300px; background: var(--paper); padding: 20px; border-radius: 8px; z-index: 101; opacity: 0; pointer-events: none; transition: opacity 0.3s ease, transform 0.3s ease; display: flex; flex-direction: column; gap: 15px; }
     .settings-menu.is-open, .settings-backdrop.is-open { opacity: 1; pointer-events: auto; }
-    .settings-menu .menu-title { margin: 0; text-align: center; font-family: sans-serif; }
+    .settings-menu .menu-title { margin: 0; text-align: center; }
   </style>
 </head>
 <body>

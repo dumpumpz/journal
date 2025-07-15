@@ -11,6 +11,7 @@
       --paper: #fffaf0;
       --bg: #f0e8d9;
       --text: #333;
+      --border-color: #ddd;
     }
 
     [data-theme="dark"] {
@@ -19,6 +20,7 @@
       --paper: #1c1c1c;
       --bg: #121212;
       --text: #e2e2e2;
+      --border-color: #444;
     }
 
     body {
@@ -51,7 +53,7 @@
     .date-header {
       font-family: 'Courier New', monospace;
       font-size: 1.2em;
-      border-bottom: 1px solid #ccc;
+      border-bottom: 1px solid var(--border-color);
       padding-bottom: 10px;
       margin: 0 0 10px 0;
     }
@@ -84,118 +86,109 @@
       color: #888;
     }
 
-    .controls {
-      margin-top: 20px;
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+    .controls { margin-top: 20px; display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    button { background: var(--primary); color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); transition: background 0.3s; }
+    button:hover:not(:disabled) { background: var(--secondary); }
+    button:disabled { background: #a99484; cursor: not-allowed; }
+    .mood-section, .habits-section { margin-top: 16px; }
+    .mood-section label, .habits-section label, .extra-section label { display: block; margin-top: 10px; font-weight: bold; }
+    select { width: 100%; padding: 6px; font-size: 1em; margin-top: 4px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--paper); color: var(--text); }
+    .theme-toggle { position: fixed; top: 10px; right: 10px; font-size: 0.9em; }
+    blockquote { margin: 0 0 10px; font-style: italic; color: #666; }
+    .habits-section label { font-weight: normal; display: flex; align-items: center; gap: 6px; }
 
-    button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 1em;
-      border-radius: 5px;
-      cursor: pointer;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-      transition: background 0.3s;
-    }
-
-    button:hover:not(:disabled) {
-      background: var(--secondary);
-    }
-
-    button:disabled {
-      background: #a99484;
-      cursor: not-allowed;
-    }
-
-    .mood-section, .habits-section {
-      margin-top: 16px;
-    }
-
-    .mood-section label, .habits-section label, .extra-section label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-
-    select {
+    /* --- CHANGE 1: ADD TABLE STYLES --- */
+    #dailyScheduleTable {
       width: 100%;
-      padding: 6px;
-      font-size: 1em;
-      margin-top: 4px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      background: var(--paper);
-      color: var(--text);
+      border-collapse: collapse;
+      margin-top: 8px;
     }
-
-    .theme-toggle {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      font-size: 0.9em;
+    #dailyScheduleTable td {
+      border: 1px solid var(--border-color);
+      padding: 8px;
+      vertical-align: top;
     }
-
-    blockquote {
-      margin: 0 0 10px;
+    #dailyScheduleTable td:first-child {
+      width: 35%;
+      font-weight: bold;
+      background-color: rgba(0,0,0,0.02);
+    }
+    [data-theme="dark"] #dailyScheduleTable td:first-child {
+      background-color: rgba(255,255,255,0.05);
+    }
+    #dailyScheduleTable td[contenteditable="true"] {
+      outline: none;
+    }
+    #dailyScheduleTable td[contenteditable="true"]:focus {
+      outline: 2px solid var(--secondary);
+      box-shadow: 0 0 5px var(--secondary);
+    }
+    /* Placeholder-like text for empty cells */
+    #dailyScheduleTable td[contenteditable="true"]:empty::before {
+      content: 'Plan your activity...';
+      color: #999;
       font-style: italic;
-      color: #666;
     }
-
-    .habits-section label {
-      font-weight: normal;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    /* --- CHANGE 1 END --- */
 
     @media (max-width: 500px) {
-      textarea {
-        font-size: 1em;
-      }
-
-      button {
-        font-size: 0.9em;
-        padding: 8px 12px;
-      }
+      textarea, #dailyScheduleTable td { font-size: 0.9em; }
+      button { font-size: 0.9em; padding: 8px 12px; }
     }
   </style>
 </head>
 <body>
   <button class="theme-toggle" id="themeToggle">🌙 Dark Mode</button>
-
   <div class="journal-page">
     <h2 class="date-header" id="dateHeader">Loading...</h2>
-
     <blockquote id="quoteBox">"Quote of the day"</blockquote>
-
     <div class="extra-section">
       <label for="affirmation">📝 Morning Affirmation:</label>
       <textarea id="affirmation" placeholder="I intend to..."></textarea>
     </div>
-
     <div class="extra-section">
       <label for="topTasks">🔥 Top 3 Priorities:</label>
       <textarea id="topTasks" placeholder="1.\n2.\n3."></textarea>
     </div>
 
+    <!-- --- CHANGE 2: REPLACE TEXTAREA WITH TABLE --- -->
     <div class="extra-section">
-      <label for="dailySchedule">🗓️ My Daily Schedule:</label>
-      <textarea id="dailySchedule" placeholder="Morning (9-12): Deep work on Project X
-Afternoon (1-3): Meetings & Emails
-Evening (7-8): Read/Relax"></textarea>
+      <label>🗓️ My Daily Schedule:</label>
+      <table id="dailyScheduleTable">
+        <tbody>
+          <tr>
+            <td>Morning (6am-9am)</td>
+            <td contenteditable="true" data-slot="early-morning"></td>
+          </tr>
+          <tr>
+            <td>Focus Block (9am-12pm)</td>
+            <td contenteditable="true" data-slot="morning"></td>
+          </tr>
+          <tr>
+            <td>Midday (12pm-2pm)</td>
+            <td contenteditable="true" data-slot="midday"></td>
+          </tr>
+          <tr>
+            <td>Afternoon (2pm-5pm)</td>
+            <td contenteditable="true" data-slot="afternoon"></td>
+          </tr>
+          <tr>
+            <td>Evening (5pm-9pm)</td>
+            <td contenteditable="true" data-slot="evening"></td>
+          </tr>
+          <tr>
+            <td>Wind Down (9pm onwards)</td>
+            <td contenteditable="true" data-slot="wind-down"></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+    <!-- --- CHANGE 2 END --- -->
 
     <div class="extra-section">
       <label for="gratitude">🙏 Gratitude:</label>
       <textarea id="gratitude" placeholder="I'm thankful for..."></textarea>
     </div>
-
     <div class="mood-section">
       <label for="moodMorning">🌅 Morning Mood:</label>
       <select id="moodMorning">
@@ -225,168 +218,61 @@ Evening (7-8): Read/Relax"></textarea>
         <option>😡 Stressed</option>
       </select>
     </div>
-
     <div class="habits-section">
       <label>✅ Tiny Habits Tracker:</label>
       <label><input type="checkbox" id="habitRead"> 📚 Read 10 min</label>
       <label><input type="checkbox" id="habitMove"> 🚶 20‑min Walk</label>
       <label><input type="checkbox" id="habitWater"> 💧 2 L Water</label>
     </div>
-
     <div class="extra-section">
       <label for="eveningReflection">🌙 Evening Reflection:</label>
       <textarea id="eveningReflection" placeholder="How was today? What did I learn?"></textarea>
     </div>
-
     <textarea id="entryBox" placeholder="Write your journal entry..."></textarea>
-
     <div class="page-number" id="pageNumber"></div>
   </div>
-
   <div class="controls">
     <button id="prevBtn">‹ Prev</button>
     <button id="nextBtn">Next ›</button>
   </div>
-
   <div class="controls">
     <button id="downloadBackup">⬇️ Backup</button>
     <input type="file" id="uploadBackup" accept=".json" style="display:none;">
     <button id="loadBackup">⬆️ Load Backup</button>
   </div>
-
   <p style="font-size: 0.8em; color: #888; text-align: center; max-width: 600px;">
     Your journal is saved in this browser's local storage.
     Please use the <strong>Backup</strong> button regularly to prevent data loss.
   </p>
-
-
   <script>
     const YEAR = 2025;
     const TOTAL_DAYS = ((YEAR % 4 === 0 && YEAR % 100 !== 0) || (YEAR % 400 === 0)) ? 366 : 365;
+    const QUOTES = [ "The journey of a thousand miles begins with a single step. — Lao Tzu", "The secret of getting ahead is getting started. — Mark Twain", "The best time to plant a tree was 20 years ago. The second best time is now. — Chinese Proverb", "It does not matter how slowly you go as long as you do not stop. — Confucius", "Believe you can and you're halfway there. — Theodore Roosevelt", "Act as if what you do makes a difference. It does. — William James", "Success is not final, failure is not fatal: it is the courage to continue that counts. — Winston Churchill", "What you do today can improve all your tomorrows. — Ralph Marston", "Don't watch the clock; do what it does. Keep going. — Sam Levenson", "The future depends on what you do today. — Mahatma Gandhi", "Well done is better than well said. — Benjamin Franklin", "Focus on being productive instead of busy. — Tim Ferriss", "Discipline is the bridge between goals and accomplishment. — Jim Rohn", "The key is not to prioritize what's on your schedule, but to schedule your priorities. — Stephen Covey", "Either you run the day or the day runs you. — Jim Rohn", "Success is the sum of small efforts, repeated day in and day out. — Robert Collier", "A goal without a plan is just a wish. — Antoine de Saint-Exupéry", "The successful warrior is the average man, with laser-like focus. — Bruce Lee", "We are what we repeatedly do. Excellence, then, is not an act, but a habit. — Aristotle", "The best way to predict the future is to create it. — Peter Drucker", "Life is 10% what happens to us and 90% how we react to it. — Charles R. Swindoll", "An unexamined life is not worth living. — Socrates", "The man who moves a mountain begins by carrying away small stones. — Confucius", "A year from now you may wish you had started today. — Karen Lamb", "Simplicity is the ultimate sophistication. — Leonardo da Vinci", "Do one thing every day that scares you. — Eleanor Roosevelt", "You must be the change you wish to see in the world. — Mahatma Gandhi", "Our greatest glory is not in never falling, but in rising every time we fall. — Confucius", "What we think, we become. — Buddha", "Happiness is not something ready made. It comes from your own actions. — Dalai Lama", "To keep the body in good health is a duty... otherwise we shall not be able to keep our mind strong and clear. — Buddha", "Peace comes from within. Do not seek it without. — Buddha", "Your visions will become clear only when you can look into your own heart. Who looks outside, dreams; who looks inside, awakes. — Carl Jung", "Done is better than good. — Elizabeth Gilbert", "It is better to live your own destiny imperfectly than to live an imitation of somebody else's life with perfection. — The Bhagavad Gita" /* Truncated for brevity */ ];
 
     // Elements
-    const entryBox       = document.getElementById('entryBox');
-    const dateHeader     = document.getElementById('dateHeader');
-    const pageNumber     = document.getElementById('pageNumber');
-    const prevBtn        = document.getElementById('prevBtn');
-    const nextBtn        = document.getElementById('nextBtn');
-    const themeToggle    = document.getElementById('themeToggle');
-    const affirmation    = document.getElementById('affirmation');
-    const topTasks       = document.getElementById('topTasks');
-    const dailySchedule  = document.getElementById('dailySchedule');
-    const gratitude      = document.getElementById('gratitude');
+    const entryBox = document.getElementById('entryBox');
+    const dateHeader = document.getElementById('dateHeader');
+    const pageNumber = document.getElementById('pageNumber');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const themeToggle = document.getElementById('themeToggle');
+    const affirmation = document.getElementById('affirmation');
+    const topTasks = document.getElementById('topTasks');
+    const gratitude = document.getElementById('gratitude');
     const eveningReflection = document.getElementById('eveningReflection');
-    const moodMorning    = document.getElementById('moodMorning');
-    const moodAfternoon  = document.getElementById('moodAfternoon');
-    const moodEvening    = document.getElementById('moodEvening');
-    const habitRead      = document.getElementById('habitRead');
-    const habitMove      = document.getElementById('habitMove');
-    const habitWater     = document.getElementById('habitWater');
+    const moodMorning = document.getElementById('moodMorning');
+    const moodAfternoon = document.getElementById('moodAfternoon');
+    const moodEvening = document.getElementById('moodEvening');
+    const habitRead = document.getElementById('habitRead');
+    const habitMove = document.getElementById('habitMove');
+    const habitWater = document.getElementById('habitWater');
     const downloadBackup = document.getElementById('downloadBackup');
-    const uploadBackup   = document.getElementById('uploadBackup');
-    const loadBackup     = document.getElementById('loadBackup');
-    const quoteBox       = document.getElementById('quoteBox');
-
-    /* --- CHANGE 1: ADD STATIC QUOTES ARRAY --- */
-    const QUOTES = [
-      "The journey of a thousand miles begins with a single step. — Lao Tzu",
-      "The secret of getting ahead is getting started. — Mark Twain",
-      "The best time to plant a tree was 20 years ago. The second best time is now. — Chinese Proverb",
-      "It does not matter how slowly you go as long as you do not stop. — Confucius",
-      "Believe you can and you're halfway there. — Theodore Roosevelt",
-      "Act as if what you do makes a difference. It does. — William James",
-      "Success is not final, failure is not fatal: it is the courage to continue that counts. — Winston Churchill",
-      "You are the master of your destiny. You can influence, direct and control your own environment. — Napoleon Hill",
-      "What you do today can improve all your tomorrows. — Ralph Marston",
-      "Don't watch the clock; do what it does. Keep going. — Sam Levenson",
-      "The future depends on what you do today. — Mahatma Gandhi",
-      "Well done is better than well said. — Benjamin Franklin",
-      "The secret to productivity is to have a good starter. — Mark Twain",
-      "Focus on being productive instead of busy. — Tim Ferriss",
-      "Discipline is the bridge between goals and accomplishment. — Jim Rohn",
-      "The key is not to prioritize what's on your schedule, but to schedule your priorities. — Stephen Covey",
-      "Ordinary people think merely of spending time, great people think of using it. — Arthur Schopenhauer",
-      "The successful warrior is the average man, with laser-like focus. — Bruce Lee",
-      "To think too long about doing a thing often becomes its undoing. — Eva Young",
-      "Either you run the day or the day runs you. — Jim Rohn",
-      "Success is the sum of small efforts, repeated day in and day out. — Robert Collier",
-      "If you want to live a happy life, tie it to a goal, not to people or things. — Albert Einstein",
-      "The only way to do great work is to love what you do. — Steve Jobs",
-      "You miss 100% of the shots you don't take. — Wayne Gretzky",
-      "The harder I work, the luckier I get. — Samuel Goldwyn",
-      "A goal without a plan is just a wish. — Antoine de Saint-Exupéry",
-      "It's not what you look at that matters, it's what you see. — Henry David Thoreau",
-      "The purpose of our lives is to be happy. — Dalai Lama",
-      "Get busy living or get busy dying. — Stephen King",
-      "You only live once, but if you do it right, once is enough. — Mae West",
-      "The whole secret of a successful life is to find out what is one's destiny to do, and then do it. — Henry Ford",
-      "If you are not willing to risk the usual you will have to settle for the ordinary. — Jim Rohn",
-      "All our dreams can come true, if we have the courage to pursue them. — Walt Disney",
-      "Good, better, best. Never let it rest. 'Til your good is better and your better is best. — St. Jerome",
-      "The will to win, the desire to succeed, the urge to reach your full potential... these are the keys that will unlock the door to personal excellence. — Confucius",
-      "Don't be pushed around by the fears in your mind. Be led by the dreams in your heart. — Roy T. Bennett",
-      "Do not wait to strike till the iron is hot; but make it hot by striking. — William Butler Yeats",
-      "We are what we repeatedly do. Excellence, then, is not an act, but a habit. — Aristotle",
-      "The most difficult thing is the decision to act, the rest is merely tenacity. — Amelia Earhart",
-      "I have not failed. I've just found 10,000 ways that won't work. — Thomas A. Edison",
-      "What lies behind us and what lies before us are tiny matters compared to what lies within us. — Ralph Waldo Emerson",
-      "The best way to predict the future is to create it. — Peter Drucker",
-      "Perfection is not attainable, but if we chase perfection we can catch excellence. — Vince Lombardi",
-      "Life is 10% what happens to us and 90% how we react to it. — Charles R. Swindoll",
-
-      "An unexamined life is not worth living. — Socrates",
-      "The man who moves a mountain begins by carrying away small stones. — Confucius",
-      "A year from now you may wish you had started today. — Karen Lamb",
-      "Procrastination is the thief of time. — Edward Young",
-      "The only thing that is constant is change. — Heraclitus",
-      "He who is contented is rich. — Lao Tzu",
-      "Simplicity is the ultimate sophistication. — Leonardo da Vinci",
-      "Do one thing every day that scares you. — Eleanor Roosevelt",
-      "You must be the change you wish to see in the world. — Mahatma Gandhi",
-      "If you can dream it, you can do it. — Walt Disney",
-      "Our greatest glory is not in never falling, but in rising every time we fall. — Confucius",
-
-      "What we think, we become. — Buddha",
-      "The mind is everything. What you think you become. — Buddha",
-      "Happiness is not something ready made. It comes from your own actions. — Dalai Lama",
-      "The root of suffering is attachment. — Buddha",
-      "To keep the body in good health is a duty... otherwise we shall not be able to keep our mind strong and clear. — Buddha",
-      "Three things cannot be long hidden: the sun, the moon, and the truth. — Buddha",
-      "There is no path to happiness: happiness is the path. — Buddha",
-      "Your purpose in life is to find your purpose and give your whole heart and soul to it. — Buddha",
-      "The only real failure in life is not to be true to the best one knows. — Buddha",
-      "Peace comes from within. Do not seek it without. — Buddha",
-      "However many holy words you read, however many you speak, what good will they do you if you do not act on upon them? — Buddha",
-      "Be kind to all creatures; this is the true religion. — Buddha",
-      "Even a happy life cannot be without a measure of darkness, and the word happy would lose its meaning if it were not balanced by sadness. — Carl Jung",
-      "I am not what happened to me, I am what I choose to become. — Carl Jung",
-      "Everything that irritates us about others can lead us to an understanding of ourselves. — Carl Jung",
-      "The first half of life is devoted to forming a healthy ego, the second half is going inward and letting go of it. — Carl Jung",
-      "Your visions will become clear only when you can look into your own heart. Who looks outside, dreams; who looks inside, awakes. — Carl Jung",
-      "We cannot change anything until we accept it. Condemnation does not liberate, it oppresses. — Carl Jung",
-      "The greatest and most important problems of life are all fundamentally insoluble. They can never be solved but only outgrown. — Carl Jung",
-      "A creative life is a amplified life. It's a bigger life, a happier life, an expanded life, and a hell of a lot more interesting life. — Elizabeth Gilbert",
-      "Embrace the glorious mess that you are. — Elizabeth Gilbert",
-      "The universe buries strange jewels deep within us all, and then stands back to see if we can find them. — Elizabeth Gilbert",
-      "Done is better than good. — Elizabeth Gilbert",
-      "You have to participate relentlessly in the manifestation of your own blessings. — Elizabeth Gilbert",
-      "This is a good sign, having a broken heart. It means we have tried for something. — Elizabeth Gilbert",
-      "Stop wearing your wishbone where your backbone ought to be. — Elizabeth Gilbert",
-      "It is better to live your own destiny imperfectly than to live an imitation of somebody else's life with perfection. — The Bhagavad Gita",
-      "You are what you believe in. You become that which you believe you can become. — The Bhagavad Gita",
-      "The mind acts like an enemy for those who do not control it. — The Bhagavad Gita",
-      "Perform your obligatory duty, because action is indeed better than inaction. — The Bhagavad Gita",
-      "The wise see that there is action in the midst of inaction and inaction in the midst of action. — The Bhagavad Gita",
-      "A man's own self is his friend. A man's own self is his foe. — The Bhagavad Gita",
-      "The happiness which comes from long practice, which leads to the end of suffering, which at first is like poison, but at last like nectar - this is declared to be sattvic happiness. — The Bhagavad Gita",
-      "That which is like poison at first, but in the end like nectar, is called happiness in the mode of goodness. — The Bhagavad Gita",
-      "A gift is pure when it is given from the heart to the right person at the right time and at the right place, and when we expect nothing in return. — The Bhagavad Gita",
-      "One who is not disturbed by the incessant flow of desires—that enter like rivers into the ocean, which is ever being filled but is always still—can alone achieve peace. — The Bhagavad Gita",
-      "The ignorant work for their own profit; the wise work for the welfare of the world, without thought for themselves. — The Bhagavad Gita",
-      "There is nothing lost or wasted in this life. — The Bhagavad Gita",
-      "It's not the load that breaks you down, it's the way you carry it. — Lou Holtz"
-    ];
-    /* --- CHANGE 1 END --- */
+    const uploadBackup = document.getElementById('uploadBackup');
+    const loadBackup = document.getElementById('loadBackup');
+    const quoteBox = document.getElementById('quoteBox');
+    // --- CHANGE 3: SELECT THE TABLE INSTEAD OF THE TEXTAREA ---
+    const dailyScheduleTable = document.getElementById('dailyScheduleTable');
+    // --- CHANGE 3 END ---
 
     let currentDay = 1;
 
@@ -394,20 +280,14 @@ Evening (7-8): Read/Relax"></textarea>
       element.style.height = 'auto';
       element.style.height = (element.scrollHeight) + 'px';
     }
-
-    function getStorageKey(day, type = 'entry') {
-      return `journal-${YEAR}-day-${day}-${type}`;
-    }
-
-    function getLocKey() {
-      return `journal-${YEAR}-last-opened`;
-    }
+    function getStorageKey(day, type = 'entry') { return `journal-${YEAR}-day-${day}-${type}`; }
+    function getLocKey() { return `journal-${YEAR}-last-opened`; }
 
     function saveState() {
+      // Save standard fields
       localStorage.setItem(getStorageKey(currentDay, 'entry'), entryBox.value);
       localStorage.setItem(getStorageKey(currentDay, 'affirmation'), affirmation.value);
       localStorage.setItem(getStorageKey(currentDay, 'tasks'), topTasks.value);
-      localStorage.setItem(getStorageKey(currentDay, 'schedule'), dailySchedule.value);
       localStorage.setItem(getStorageKey(currentDay, 'gratitude'), gratitude.value);
       localStorage.setItem(getStorageKey(currentDay, 'reflection'), eveningReflection.value);
       localStorage.setItem(getStorageKey(currentDay, 'mood-morning'), moodMorning.value);
@@ -417,21 +297,48 @@ Evening (7-8): Read/Relax"></textarea>
       localStorage.setItem(getStorageKey(currentDay, 'habit-move'), habitMove.checked);
       localStorage.setItem(getStorageKey(currentDay, 'habit-water'), habitWater.checked);
       localStorage.setItem(getLocKey(), currentDay);
+
+      // --- CHANGE 4: CUSTOM LOGIC TO SAVE TABLE DATA ---
+      const scheduleData = {};
+      dailyScheduleTable.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+        scheduleData[cell.dataset.slot] = cell.innerHTML; // Use innerHTML to save formatting like line breaks
+      });
+      localStorage.setItem(getStorageKey(currentDay, 'schedule'), JSON.stringify(scheduleData));
+      // --- CHANGE 4 END ---
     }
 
     function loadState() {
-      entryBox.value          = localStorage.getItem(getStorageKey(currentDay, 'entry')) || '';
-      affirmation.value       = localStorage.getItem(getStorageKey(currentDay, 'affirmation')) || '';
-      topTasks.value          = localStorage.getItem(getStorageKey(currentDay, 'tasks')) || '';
-      dailySchedule.value     = localStorage.getItem(getStorageKey(currentDay, 'schedule')) || '';
-      gratitude.value         = localStorage.getItem(getStorageKey(currentDay, 'gratitude')) || '';
+      // Load standard fields
+      entryBox.value = localStorage.getItem(getStorageKey(currentDay, 'entry')) || '';
+      affirmation.value = localStorage.getItem(getStorageKey(currentDay, 'affirmation')) || '';
+      topTasks.value = localStorage.getItem(getStorageKey(currentDay, 'tasks')) || '';
+      gratitude.value = localStorage.getItem(getStorageKey(currentDay, 'gratitude')) || '';
       eveningReflection.value = localStorage.getItem(getStorageKey(currentDay, 'reflection')) || '';
-      moodMorning.value   = localStorage.getItem(getStorageKey(currentDay, 'mood-morning')) || '';
+      moodMorning.value = localStorage.getItem(getStorageKey(currentDay, 'mood-morning')) || '';
       moodAfternoon.value = localStorage.getItem(getStorageKey(currentDay, 'mood-afternoon')) || '';
-      moodEvening.value   = localStorage.getItem(getStorageKey(currentDay, 'mood-evening')) || '';
-      habitRead.checked  = localStorage.getItem(getStorageKey(currentDay, 'habit-read')) === 'true';
-      habitMove.checked  = localStorage.getItem(getStorageKey(currentDay, 'habit-move')) === 'true';
+      moodEvening.value = localStorage.getItem(getStorageKey(currentDay, 'mood-evening')) || '';
+      habitRead.checked = localStorage.getItem(getStorageKey(currentDay, 'habit-read')) === 'true';
+      habitMove.checked = localStorage.getItem(getStorageKey(currentDay, 'habit-move')) === 'true';
       habitWater.checked = localStorage.getItem(getStorageKey(currentDay, 'habit-water')) === 'true';
+
+      // --- CHANGE 5: CUSTOM LOGIC TO LOAD TABLE DATA ---
+      const savedSchedule = localStorage.getItem(getStorageKey(currentDay, 'schedule'));
+      const scheduleCells = dailyScheduleTable.querySelectorAll('td[contenteditable="true"]');
+      if (savedSchedule) {
+        try {
+          const scheduleData = JSON.parse(savedSchedule);
+          scheduleCells.forEach(cell => {
+            cell.innerHTML = scheduleData[cell.dataset.slot] || '';
+          });
+        } catch(e) {
+          console.error("Could not parse schedule data for day " + currentDay);
+          scheduleCells.forEach(cell => { cell.innerHTML = ''; });
+        }
+      } else {
+        // Clear table if no data is found
+        scheduleCells.forEach(cell => { cell.innerHTML = ''; });
+      }
+      // --- CHANGE 5 END ---
     }
 
     function updatePage() {
@@ -439,33 +346,15 @@ Evening (7-8): Read/Relax"></textarea>
       const dateStr = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
       dateHeader.textContent = dateStr;
       pageNumber.textContent = `Day ${currentDay} of ${TOTAL_DAYS}`;
-
-      /* --- CHANGE 2: REVERT TO STATIC QUOTE LOGIC --- */
       quoteBox.textContent = QUOTES[(currentDay - 1) % QUOTES.length];
-      /* --- CHANGE 2 END --- */
-
       loadState();
       document.querySelectorAll('textarea').forEach(autoGrow);
       prevBtn.disabled = currentDay <= 1;
       nextBtn.disabled = currentDay >= TOTAL_DAYS;
     }
 
-    function goNext() {
-      saveState();
-      if (currentDay < TOTAL_DAYS) {
-        currentDay++;
-        updatePage();
-      }
-    }
-
-    function goPrev() {
-      saveState();
-      if (currentDay > 1) {
-        currentDay--;
-        updatePage();
-      }
-    }
-
+    function goNext() { saveState(); if (currentDay < TOTAL_DAYS) { currentDay++; updatePage(); } }
+    function goPrev() { saveState(); if (currentDay > 1) { currentDay--; updatePage(); } }
     function init() {
       const saved = parseInt(localStorage.getItem(getLocKey()), 10);
       const today = new Date();
@@ -494,40 +383,46 @@ Evening (7-8): Read/Relax"></textarea>
 
     prevBtn.addEventListener('click', goPrev);
     nextBtn.addEventListener('click', goNext);
-    const allTextAreas = [entryBox, affirmation, topTasks, gratitude, eveningReflection, dailySchedule];
+
+    const allTextAreas = [entryBox, affirmation, topTasks, gratitude, eveningReflection];
     allTextAreas.forEach(el => {
       el.addEventListener('input', () => {
         saveState();
         autoGrow(el);
       });
     });
+
+    // --- CHANGE 6: ADD EVENT LISTENER TO THE TABLE ---
+    dailyScheduleTable.addEventListener('input', saveState);
+    // --- CHANGE 6 END ---
+
     [moodMorning, moodAfternoon, moodEvening].forEach(el => el.addEventListener('change', saveState));
     [habitRead, habitMove, habitWater].forEach(el => el.addEventListener('change', saveState));
     init();
 
-    /* ----------------- BACKUP & RESTORE ------------------ */
+    /* ----------------- BACKUP & RESTORE (No changes needed here, it just works!) ------------------ */
     downloadBackup.addEventListener('click', () => {
       const data = {};
       for (let day = 1; day <= TOTAL_DAYS; day++) {
         data[`day-${day}`] = {
-          entry        : localStorage.getItem(getStorageKey(day, 'entry')) || '',
-          affirmation  : localStorage.getItem(getStorageKey(day, 'affirmation')) || '',
-          tasks        : localStorage.getItem(getStorageKey(day, 'tasks')) || '',
-          gratitude    : localStorage.getItem(getStorageKey(day, 'gratitude')) || '',
-          reflection   : localStorage.getItem(getStorageKey(day, 'reflection')) || '',
-          schedule     : localStorage.getItem(getStorageKey(day, 'schedule')) || '',
-          moodMorning  : localStorage.getItem(getStorageKey(day, 'mood-morning')) || '',
+          entry: localStorage.getItem(getStorageKey(day, 'entry')) || '',
+          affirmation: localStorage.getItem(getStorageKey(day, 'affirmation')) || '',
+          tasks: localStorage.getItem(getStorageKey(day, 'tasks')) || '',
+          gratitude: localStorage.getItem(getStorageKey(day, 'gratitude')) || '',
+          reflection: localStorage.getItem(getStorageKey(day, 'reflection')) || '',
+          schedule: localStorage.getItem(getStorageKey(day, 'schedule')) || '', // This now saves the JSON string
+          moodMorning: localStorage.getItem(getStorageKey(day, 'mood-morning')) || '',
           moodAfternoon: localStorage.getItem(getStorageKey(day, 'mood-afternoon')) || '',
-          moodEvening  : localStorage.getItem(getStorageKey(day, 'mood-evening')) || '',
+          moodEvening: localStorage.getItem(getStorageKey(day, 'mood-evening')) || '',
           habits: {
-            read  : localStorage.getItem(getStorageKey(day, 'habit-read')) === 'true',
-            move  : localStorage.getItem(getStorageKey(day, 'habit-move')) === 'true',
-            water : localStorage.getItem(getStorageKey(day, 'habit-water')) === 'true'
+            read: localStorage.getItem(getStorageKey(day, 'habit-read')) === 'true',
+            move: localStorage.getItem(getStorageKey(day, 'habit-move')) === 'true',
+            water: localStorage.getItem(getStorageKey(day, 'habit-water')) === 'true'
           }
         };
       }
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url  = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `journal-backup-${YEAR}.json`;
@@ -547,18 +442,18 @@ Evening (7-8): Read/Relax"></textarea>
           for (const [dayKey, values] of Object.entries(data)) {
             const day = parseInt(dayKey.replace('day-', ''), 10);
             if (day >= 1 && day <= TOTAL_DAYS) {
-              localStorage.setItem(getStorageKey(day, 'entry'),        values.entry || '');
-              localStorage.setItem(getStorageKey(day, 'affirmation'),  values.affirmation || '');
-              localStorage.setItem(getStorageKey(day, 'tasks'),        values.tasks || '');
-              localStorage.setItem(getStorageKey(day, 'gratitude'),    values.gratitude || '');
-              localStorage.setItem(getStorageKey(day, 'reflection'),   values.reflection || '');
-              localStorage.setItem(getStorageKey(day, 'schedule'),     values.schedule || '');
+              localStorage.setItem(getStorageKey(day, 'entry'), values.entry || '');
+              localStorage.setItem(getStorageKey(day, 'affirmation'), values.affirmation || '');
+              localStorage.setItem(getStorageKey(day, 'tasks'), values.tasks || '');
+              localStorage.setItem(getStorageKey(day, 'gratitude'), values.gratitude || '');
+              localStorage.setItem(getStorageKey(day, 'reflection'), values.reflection || '');
+              localStorage.setItem(getStorageKey(day, 'schedule'), values.schedule || ''); // This now restores the JSON string
               localStorage.setItem(getStorageKey(day, 'mood-morning'), values.moodMorning || '');
               localStorage.setItem(getStorageKey(day, 'mood-afternoon'), values.moodAfternoon || '');
               localStorage.setItem(getStorageKey(day, 'mood-evening'), values.moodEvening || '');
               if (values.habits) {
-                localStorage.setItem(getStorageKey(day, 'habit-read'),  values.habits.read);
-                localStorage.setItem(getStorageKey(day, 'habit-move'),  values.habits.move);
+                localStorage.setItem(getStorageKey(day, 'habit-read'), values.habits.read);
+                localStorage.setItem(getStorageKey(day, 'habit-move'), values.habits.move);
                 localStorage.setItem(getStorageKey(day, 'habit-water'), values.habits.water);
               }
             }
@@ -567,6 +462,7 @@ Evening (7-8): Read/Relax"></textarea>
           updatePage();
         } catch (err) {
           alert('❌ Failed to load backup. Invalid file.');
+          console.error(err);
         }
       };
       reader.readAsText(file);

@@ -10,12 +10,26 @@
     *, *:before, *:after { box-sizing: inherit; }
     html, body { overflow-x: hidden; }
 
-    /* Root and Theme variables are unchanged */
+    /* --- CHANGE: Updated Color Schemes --- */
     :root {
-      --paper: #f5f5f5; --bg: #e4e9ed; --text: #333; --text-light: #555; --border-color: #d1d1d1; --accent: #b48ead; --shadow: rgba(0,0,0,0.1);
+      /* Easy-on-the-eyes "Paper" theme for day mode */
+      --paper: #FBF6EF; /* Soft, almost-white cream */
+      --bg: #F0EADE; /* Slightly darker "linen" background */
+      --text: #4a4a4a; /* Dark charcoal, not pure black */
+      --text-light: #7a7a7a; /* Medium grey */
+      --border-color: #dcd6cc; /* Subtle border matching the theme */
+      --accent: #8A9A5B; /* Muted, earthy "Moss Green" */
+      --shadow: rgba(0,0,0,0.08);
     }
     [data-theme="dark"] {
-      --paper: #282c34; --bg: #21252b; --text: #d8dee9; --text-light: #abb2bf; --border-color: #4c566a; --accent: #88c0d0; --shadow: rgba(0,0,0,0.2);
+      /* True black dark mode */
+      --paper: #1c1c1c; /* Very dark grey, just off black */
+      --bg: #000000; /* True black */
+      --text: #e2e2e2; /* Light grey, not pure white */
+      --text-light: #9e9e9e; /* Dimmer grey for labels */
+      --border-color: #3a3a3a; /* Visible but not jarring border */
+      --accent: #4682B4; /* "Steel Blue" that pops on black */
+      --shadow: rgba(0,0,0,0.4);
     }
     
     /* Body and Main styles are unchanged */
@@ -32,7 +46,6 @@
     .prompt-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
     .prompt-group label { font-weight: bold; color: var(--text-light); font-size: 1em; font-family: sans-serif; }
 
-    /* --- CHANGE: Updated styles to target textarea instead of input --- */
     .prompt-group textarea {
       font-family: inherit;
       font-size: 1.05em;
@@ -42,8 +55,8 @@
       background: var(--bg);
       border-radius: 4px;
       color: var(--text);
-      resize: none; /* Disable manual resizing */
-      overflow-y: hidden; /* Critical for auto-grow */
+      resize: none;
+      overflow-y: hidden;
     }
     .prompt-group textarea:focus {
       outline: 2px solid var(--accent);
@@ -69,7 +82,6 @@
     .settings-menu { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 300px; background: var(--paper); padding: 20px; border-radius: 8px; z-index: 101; opacity: 0; pointer-events: none; transition: opacity 0.3s ease, transform 0.3s ease; display: flex; flex-direction: column; gap: 15px; }
     .settings-menu.is-open, .settings-backdrop.is-open { opacity: 1; pointer-events: auto; }
     .settings-menu .menu-title { margin: 0; text-align: center; font-family: sans-serif; }
-    .settings-menu button { width: 100%; }
   </style>
 </head>
 <body>
@@ -83,12 +95,10 @@
     <section class="prompts">
         <div class="prompt-group">
             <label for="goal">🎯 Morning Goal</label>
-            <!-- --- CHANGE: Converted from input to textarea --- -->
             <textarea id="goal" rows="1" placeholder="What's your #1 objective for today?"></textarea>
         </div>
         <div class="prompt-group">
             <label for="eveningNote">📝 End-of-Day Thoughts</label>
-            <!-- --- CHANGE: Converted from input to textarea --- -->
             <textarea id="eveningNote" rows="1" placeholder="A note on how the day went..."></textarea>
         </div>
     </section>
@@ -135,8 +145,7 @@
   </div>
 
 <script>
-// The JavaScript does not require any changes for this to work,
-// thanks to the robust event handling already in place.
+// The JavaScript does not require any changes.
 const app = {
   YEAR: 2025,
   currentDay: 1,

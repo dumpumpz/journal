@@ -72,12 +72,10 @@
       padding: 6px;
     }
 
-    /* --- CHANGE 1a: Adjust CSS for auto-growing textareas --- */
     textarea {
-      min-height: 3em; /* Set a smaller min-height, enough for about two lines */
-      overflow-y: hidden; /* Hide vertical scrollbar */
+      min-height: 3em;
+      overflow-y: hidden;
     }
-    /* --- CHANGE 1a END --- */
 
     .page-number {
       margin-top: 10px;
@@ -189,6 +187,15 @@
       <textarea id="topTasks" placeholder="1.\n2.\n3."></textarea>
     </div>
 
+    <!-- --- CHANGE 1: ADD DAILY SCHEDULE HTML --- -->
+    <div class="extra-section">
+      <label for="dailySchedule">🗓️ My Daily Schedule:</label>
+      <textarea id="dailySchedule" placeholder="Morning (9-12): Deep work on Project X
+Afternoon (1-3): Meetings & Emails
+Evening (7-8): Read/Relax"></textarea>
+    </div>
+    <!-- --- CHANGE 1 END --- -->
+
     <!-- Gratitude box -->
     <div class="extra-section">
       <label for="gratitude">🙏 Gratitude:</label>
@@ -232,8 +239,6 @@
     <div class="habits-section">
       <label>✅ Tiny Habits Tracker:</label>
       <label><input type="checkbox" id="habitRead"> 📚 Read 10 min</label>
-      <label><input type="checkbox" id="habitMove"> 🚶 20‑min Walk</label>
-      <label><input type="checkbox" id="habitWater"> 💧 2 L Water</label>
     </div>
 
     <!-- Evening reflection -->
@@ -284,6 +289,10 @@
     const gratitude      = document.getElementById('gratitude');
     const eveningReflection = document.getElementById('eveningReflection');
 
+    // --- CHANGE 2: SELECT THE NEW ELEMENT ---
+    const dailySchedule  = document.getElementById('dailySchedule');
+    // --- CHANGE 2 END ---
+
     const moodMorning    = document.getElementById('moodMorning');
     const moodAfternoon  = document.getElementById('moodAfternoon');
     const moodEvening    = document.getElementById('moodEvening');
@@ -298,17 +307,12 @@
 
     const quoteBox       = document.getElementById('quoteBox');
 
-    /* --- CHANGE 2a: Remove the static QUOTES array --- */
-    // const QUOTES = [ ... ]; // This is no longer needed
-
     let currentDay = 1;
 
-    /* --- CHANGE 1b: Add the auto-grow function --- */
     function autoGrow(element) {
-      element.style.height = 'auto'; // Reset height to recalculate
+      element.style.height = 'auto';
       element.style.height = (element.scrollHeight) + 'px';
     }
-    /* --- CHANGE 1b END --- */
 
     function getStorageKey(day, type = 'entry') {
       return `journal-${YEAR}-day-${day}-${type}`;
@@ -324,6 +328,9 @@
       localStorage.setItem(getStorageKey(currentDay, 'tasks'), topTasks.value);
       localStorage.setItem(getStorageKey(currentDay, 'gratitude'), gratitude.value);
       localStorage.setItem(getStorageKey(currentDay, 'reflection'), eveningReflection.value);
+      // --- CHANGE 3: SAVE THE SCHEDULE ---
+      localStorage.setItem(getStorageKey(currentDay, 'schedule'), dailySchedule.value);
+      // --- CHANGE 3 END ---
 
       localStorage.setItem(getStorageKey(currentDay, 'mood-morning'), moodMorning.value);
       localStorage.setItem(getStorageKey(currentDay, 'mood-afternoon'), moodAfternoon.value);
@@ -342,6 +349,9 @@
       topTasks.value          = localStorage.getItem(getStorageKey(currentDay, 'tasks')) || '';
       gratitude.value         = localStorage.getItem(getStorageKey(currentDay, 'gratitude')) || '';
       eveningReflection.value = localStorage.getItem(getStorageKey(currentDay, 'reflection')) || '';
+      // --- CHANGE 4: LOAD THE SCHEDULE ---
+      dailySchedule.value     = localStorage.getItem(getStorageKey(currentDay, 'schedule')) || '';
+      // --- CHANGE 4 END ---
 
       moodMorning.value   = localStorage.getItem(getStorageKey(currentDay, 'mood-morning')) || '';
       moodAfternoon.value = localStorage.getItem(getStorageKey(currentDay, 'mood-afternoon')) || '';
@@ -358,7 +368,6 @@
       dateHeader.textContent = dateStr;
       pageNumber.textContent = `Day ${currentDay} of ${TOTAL_DAYS}`;
 
-      /* --- CHANGE 2b: Fetch quote from API --- */
       fetch('https://api.quotable.io/random?tags=inspirational|wisdom')
         .then(res => res.json())
         .then(data => {
@@ -368,16 +377,11 @@
         })
         .catch(err => {
             console.error("Failed to fetch quote, using fallback.", err);
-            // Fallback quote in case the API fails
             quoteBox.textContent = "The journey of a thousand miles begins with a single step. — Lao Tzu";
         });
-      /* --- CHANGE 2b END --- */
 
       loadState();
-
-      /* --- CHANGE 1c: Resize textareas after loading content --- */
       document.querySelectorAll('textarea').forEach(autoGrow);
-      /* --- CHANGE 1c END --- */
 
       prevBtn.disabled = currentDay <= 1;
       nextBtn.disabled = currentDay >= TOTAL_DAYS;
@@ -407,14 +411,12 @@
       currentDay = (!isNaN(saved)) ? saved : (today.getFullYear() === YEAR ? dayOfYear : 1);
       updatePage();
 
-      // Load theme
       if (localStorage.getItem('journal-theme') === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
         themeToggle.textContent = '☀️ Light Mode';
       }
     }
 
-    // Theme toggle
     themeToggle.addEventListener('click', () => {
       const current = document.documentElement.getAttribute('data-theme');
       if (current === 'dark') {
@@ -428,20 +430,18 @@
       }
     });
 
-    // Events
     prevBtn.addEventListener('click', goPrev);
     nextBtn.addEventListener('click', goNext);
 
-    /* --- CHANGE 1d: Update textarea event listeners --- */
-    const allTextAreas = [entryBox, affirmation, topTasks, gratitude, eveningReflection];
+    // --- CHANGE 5: ADD SCHEDULE TO TEXTAREA EVENT LISTENERS ---
+    const allTextAreas = [entryBox, affirmation, topTasks, gratitude, eveningReflection, dailySchedule];
     allTextAreas.forEach(el => {
       el.addEventListener('input', () => {
-        // We call both functions on input.
         saveState();
         autoGrow(el);
       });
     });
-    /* --- CHANGE 1d END --- */
+    // --- CHANGE 5 END ---
 
     [moodMorning, moodAfternoon, moodEvening].forEach(el => el.addEventListener('change', saveState));
     [habitRead, habitMove, habitWater].forEach(el => el.addEventListener('change', saveState));
@@ -458,6 +458,9 @@
           tasks        : localStorage.getItem(getStorageKey(day, 'tasks')) || '',
           gratitude    : localStorage.getItem(getStorageKey(day, 'gratitude')) || '',
           reflection   : localStorage.getItem(getStorageKey(day, 'reflection')) || '',
+          // --- CHANGE 6: ADD SCHEDULE TO BACKUP ---
+          schedule     : localStorage.getItem(getStorageKey(day, 'schedule')) || '',
+          // --- CHANGE 6 END ---
 
           moodMorning  : localStorage.getItem(getStorageKey(day, 'mood-morning')) || '',
           moodAfternoon: localStorage.getItem(getStorageKey(day, 'mood-afternoon')) || '',
@@ -497,6 +500,9 @@
               localStorage.setItem(getStorageKey(day, 'tasks'),        values.tasks || '');
               localStorage.setItem(getStorageKey(day, 'gratitude'),    values.gratitude || '');
               localStorage.setItem(getStorageKey(day, 'reflection'),   values.reflection || '');
+              // --- CHANGE 7: ADD SCHEDULE TO RESTORE ---
+              localStorage.setItem(getStorageKey(day, 'schedule'),     values.schedule || '');
+              // --- CHANGE 7 END ---
 
               localStorage.setItem(getStorageKey(day, 'mood-morning'), values.moodMorning || '');
               localStorage.setItem(getStorageKey(day, 'mood-afternoon'), values.moodAfternoon || '');

@@ -72,9 +72,12 @@
       padding: 6px;
     }
 
+    /* --- CHANGE 1a: Adjust CSS for auto-growing textareas --- */
     textarea {
-      min-height: 80px;
+      min-height: 3em; /* Set a smaller min-height, enough for about two lines */
+      overflow-y: hidden; /* Hide vertical scrollbar */
     }
+    /* --- CHANGE 1a END --- */
 
     .page-number {
       margin-top: 10px;
@@ -258,6 +261,12 @@
     <button id="loadBackup">⬆️ Load Backup</button>
   </div>
 
+  <p style="font-size: 0.8em; color: #888; text-align: center; max-width: 600px;">
+    Your journal is saved in this browser's local storage.
+    Please use the <strong>Backup</strong> button regularly to prevent data loss.
+  </p>
+
+
   <script>
     const YEAR = 2025;
     const TOTAL_DAYS = ((YEAR % 4 === 0 && YEAR % 100 !== 0) || (YEAR % 400 === 0)) ? 366 : 365;
@@ -289,16 +298,17 @@
 
     const quoteBox       = document.getElementById('quoteBox');
 
-    const QUOTES = [
-      'The journey of a thousand miles begins with a single step. — Lao Tzu',
-      'What you do today can improve all your tomorrows. — Ralph Marston',
-      'Small daily improvements over time lead to stunning results. — Robin Sharma',
-      'The best way to predict the future is to create it. — Peter Drucker',
-      'Discipline is the bridge between goals and accomplishment. — Jim Rohn',
-      'Focus on being productive instead of busy. — Tim Ferriss'
-    ];
+    /* --- CHANGE 2a: Remove the static QUOTES array --- */
+    // const QUOTES = [ ... ]; // This is no longer needed
 
     let currentDay = 1;
+
+    /* --- CHANGE 1b: Add the auto-grow function --- */
+    function autoGrow(element) {
+      element.style.height = 'auto'; // Reset height to recalculate
+      element.style.height = (element.scrollHeight) + 'px';
+    }
+    /* --- CHANGE 1b END --- */
 
     function getStorageKey(day, type = 'entry') {
       return `journal-${YEAR}-day-${day}-${type}`;
@@ -348,10 +358,27 @@
       dateHeader.textContent = dateStr;
       pageNumber.textContent = `Day ${currentDay} of ${TOTAL_DAYS}`;
 
-      // Quote of the day
-      quoteBox.textContent = QUOTES[(currentDay - 1) % QUOTES.length];
+      /* --- CHANGE 2b: Fetch quote from API --- */
+      fetch('https://api.quotable.io/random?tags=inspirational|wisdom')
+        .then(res => res.json())
+        .then(data => {
+            if (data.content && data.author) {
+                quoteBox.textContent = `"${data.content}" — ${data.author}`;
+            }
+        })
+        .catch(err => {
+            console.error("Failed to fetch quote, using fallback.", err);
+            // Fallback quote in case the API fails
+            quoteBox.textContent = "The journey of a thousand miles begins with a single step. — Lao Tzu";
+        });
+      /* --- CHANGE 2b END --- */
 
       loadState();
+
+      /* --- CHANGE 1c: Resize textareas after loading content --- */
+      document.querySelectorAll('textarea').forEach(autoGrow);
+      /* --- CHANGE 1c END --- */
+
       prevBtn.disabled = currentDay <= 1;
       nextBtn.disabled = currentDay >= TOTAL_DAYS;
     }
@@ -405,7 +432,17 @@
     prevBtn.addEventListener('click', goPrev);
     nextBtn.addEventListener('click', goNext);
 
-    [entryBox, affirmation, topTasks, gratitude, eveningReflection].forEach(el => el.addEventListener('input', saveState));
+    /* --- CHANGE 1d: Update textarea event listeners --- */
+    const allTextAreas = [entryBox, affirmation, topTasks, gratitude, eveningReflection];
+    allTextAreas.forEach(el => {
+      el.addEventListener('input', () => {
+        // We call both functions on input.
+        saveState();
+        autoGrow(el);
+      });
+    });
+    /* --- CHANGE 1d END --- */
+
     [moodMorning, moodAfternoon, moodEvening].forEach(el => el.addEventListener('change', saveState));
     [habitRead, habitMove, habitWater].forEach(el => el.addEventListener('change', saveState));
 

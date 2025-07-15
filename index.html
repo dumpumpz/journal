@@ -56,10 +56,8 @@
       margin: 0 0 10px 0;
     }
 
-    textarea {
-      flex-grow: 1;
+    textarea, input[type="text"], input[type="number"] {
       width: 100%;
-      min-height: 40vh;
       font-size: 1em;
       font-family: Georgia, serif;
       border: none;
@@ -69,6 +67,13 @@
       line-height: 1.6;
       color: var(--text);
       box-sizing: border-box;
+      background: var(--paper);
+      border-radius: 6px;
+      padding: 6px;
+    }
+
+    textarea {
+      min-height: 80px;
     }
 
     .page-number {
@@ -107,11 +112,11 @@
       cursor: not-allowed;
     }
 
-    .mood-section {
+    .mood-section, .habits-section {
       margin-top: 16px;
     }
 
-    .mood-section label {
+    .mood-section label, .habits-section label, .extra-section label {
       display: block;
       margin-top: 10px;
       font-weight: bold;
@@ -135,10 +140,22 @@
       font-size: 0.9em;
     }
 
+    blockquote {
+      margin: 0 0 10px;
+      font-style: italic;
+      color: #666;
+    }
+
+    .habits-section label {
+      font-weight: normal;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     @media (max-width: 500px) {
       textarea {
         font-size: 1em;
-        min-height: 50vh;
       }
 
       button {
@@ -153,8 +170,29 @@
 
   <div class="journal-page">
     <h2 class="date-header" id="dateHeader">Loading...</h2>
-    <textarea id="entryBox" placeholder="Write your journal entry..."></textarea>
 
+    <!-- Daily quote -->
+    <blockquote id="quoteBox">"Quote of the day"</blockquote>
+
+    <!-- Morning affirmation -->
+    <div class="extra-section">
+      <label for="affirmation">📝 Morning Affirmation:</label>
+      <textarea id="affirmation" placeholder="I intend to..."></textarea>
+    </div>
+
+    <!-- Top 3 priorities -->
+    <div class="extra-section">
+      <label for="topTasks">🔥 Top 3 Priorities:</label>
+      <textarea id="topTasks" placeholder="1.\n2.\n3."></textarea>
+    </div>
+
+    <!-- Gratitude box -->
+    <div class="extra-section">
+      <label for="gratitude">🙏 Gratitude:</label>
+      <textarea id="gratitude" placeholder="I'm thankful for..."></textarea>
+    </div>
+
+    <!-- Mood selections -->
     <div class="mood-section">
       <label for="moodMorning">🌅 Morning Mood:</label>
       <select id="moodMorning">
@@ -187,26 +225,44 @@
       </select>
     </div>
 
+    <!-- Tiny habits -->
+    <div class="habits-section">
+      <label>✅ Tiny Habits Tracker:</label>
+      <label><input type="checkbox" id="habitRead"> 📚 Read 10 min</label>
+      <label><input type="checkbox" id="habitMove"> 🚶 20‑min Walk</label>
+      <label><input type="checkbox" id="habitWater"> 💧 2 L Water</label>
+    </div>
+
+    <!-- Evening reflection -->
+    <div class="extra-section">
+      <label for="eveningReflection">🌙 Evening Reflection:</label>
+      <textarea id="eveningReflection" placeholder="How was today? What did I learn?"></textarea>
+    </div>
+
+    <!-- Main journal entry -->
+    <textarea id="entryBox" placeholder="Write your journal entry..."></textarea>
+
     <div class="page-number" id="pageNumber"></div>
   </div>
 
-<!-- Navigation buttons -->
-<div class="controls">
-  <button id="prevBtn">‹ Prev</button>
-  <button id="nextBtn">Next ›</button>
-</div>
+  <!-- Navigation controls -->
+  <div class="controls">
+    <button id="prevBtn">‹ Prev</button>
+    <button id="nextBtn">Next ›</button>
+  </div>
 
-<!-- Backup buttons on a new line -->
-<div class="controls">
-  <button id="downloadBackup">⬇️ Backup</button>
-  <input type="file" id="uploadBackup" accept=".json" style="display:none;">
-  <button id="loadBackup">⬆️ Load Backup</button>
-</div>
+  <!-- Backup controls on separate line -->
+  <div class="controls">
+    <button id="downloadBackup">⬇️ Backup</button>
+    <input type="file" id="uploadBackup" accept=".json" style="display:none;">
+    <button id="loadBackup">⬆️ Load Backup</button>
+  </div>
 
   <script>
     const YEAR = 2025;
     const TOTAL_DAYS = ((YEAR % 4 === 0 && YEAR % 100 !== 0) || (YEAR % 400 === 0)) ? 366 : 365;
 
+    // Elements
     const entryBox       = document.getElementById('entryBox');
     const dateHeader     = document.getElementById('dateHeader');
     const pageNumber     = document.getElementById('pageNumber');
@@ -214,14 +270,33 @@
     const nextBtn        = document.getElementById('nextBtn');
     const themeToggle    = document.getElementById('themeToggle');
 
+    const affirmation    = document.getElementById('affirmation');
+    const topTasks       = document.getElementById('topTasks');
+    const gratitude      = document.getElementById('gratitude');
+    const eveningReflection = document.getElementById('eveningReflection');
+
     const moodMorning    = document.getElementById('moodMorning');
     const moodAfternoon  = document.getElementById('moodAfternoon');
     const moodEvening    = document.getElementById('moodEvening');
 
-    // NEW ➜ backup controls
+    const habitRead      = document.getElementById('habitRead');
+    const habitMove      = document.getElementById('habitMove');
+    const habitWater     = document.getElementById('habitWater');
+
     const downloadBackup = document.getElementById('downloadBackup');
     const uploadBackup   = document.getElementById('uploadBackup');
     const loadBackup     = document.getElementById('loadBackup');
+
+    const quoteBox       = document.getElementById('quoteBox');
+
+    const QUOTES = [
+      'The journey of a thousand miles begins with a single step. — Lao Tzu',
+      'What you do today can improve all your tomorrows. — Ralph Marston',
+      'Small daily improvements over time lead to stunning results. — Robin Sharma',
+      'The best way to predict the future is to create it. — Peter Drucker',
+      'Discipline is the bridge between goals and accomplishment. — Jim Rohn',
+      'Focus on being productive instead of busy. — Tim Ferriss'
+    ];
 
     let currentDay = 1;
 
@@ -235,17 +310,36 @@
 
     function saveState() {
       localStorage.setItem(getStorageKey(currentDay, 'entry'), entryBox.value);
+      localStorage.setItem(getStorageKey(currentDay, 'affirmation'), affirmation.value);
+      localStorage.setItem(getStorageKey(currentDay, 'tasks'), topTasks.value);
+      localStorage.setItem(getStorageKey(currentDay, 'gratitude'), gratitude.value);
+      localStorage.setItem(getStorageKey(currentDay, 'reflection'), eveningReflection.value);
+
       localStorage.setItem(getStorageKey(currentDay, 'mood-morning'), moodMorning.value);
       localStorage.setItem(getStorageKey(currentDay, 'mood-afternoon'), moodAfternoon.value);
       localStorage.setItem(getStorageKey(currentDay, 'mood-evening'), moodEvening.value);
+
+      localStorage.setItem(getStorageKey(currentDay, 'habit-read'), habitRead.checked);
+      localStorage.setItem(getStorageKey(currentDay, 'habit-move'), habitMove.checked);
+      localStorage.setItem(getStorageKey(currentDay, 'habit-water'), habitWater.checked);
+
       localStorage.setItem(getLocKey(), currentDay);
     }
 
     function loadState() {
-      entryBox.value   = localStorage.getItem(getStorageKey(currentDay, 'entry')) || '';
-      moodMorning.value  = localStorage.getItem(getStorageKey(currentDay, 'mood-morning')) || '';
-      moodAfternoon.value= localStorage.getItem(getStorageKey(currentDay, 'mood-afternoon')) || '';
-      moodEvening.value  = localStorage.getItem(getStorageKey(currentDay, 'mood-evening')) || '';
+      entryBox.value          = localStorage.getItem(getStorageKey(currentDay, 'entry')) || '';
+      affirmation.value       = localStorage.getItem(getStorageKey(currentDay, 'affirmation')) || '';
+      topTasks.value          = localStorage.getItem(getStorageKey(currentDay, 'tasks')) || '';
+      gratitude.value         = localStorage.getItem(getStorageKey(currentDay, 'gratitude')) || '';
+      eveningReflection.value = localStorage.getItem(getStorageKey(currentDay, 'reflection')) || '';
+
+      moodMorning.value   = localStorage.getItem(getStorageKey(currentDay, 'mood-morning')) || '';
+      moodAfternoon.value = localStorage.getItem(getStorageKey(currentDay, 'mood-afternoon')) || '';
+      moodEvening.value   = localStorage.getItem(getStorageKey(currentDay, 'mood-evening')) || '';
+
+      habitRead.checked  = localStorage.getItem(getStorageKey(currentDay, 'habit-read')) === 'true';
+      habitMove.checked  = localStorage.getItem(getStorageKey(currentDay, 'habit-move')) === 'true';
+      habitWater.checked = localStorage.getItem(getStorageKey(currentDay, 'habit-water')) === 'true';
     }
 
     function updatePage() {
@@ -253,6 +347,10 @@
       const dateStr = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
       dateHeader.textContent = dateStr;
       pageNumber.textContent = `Day ${currentDay} of ${TOTAL_DAYS}`;
+
+      // Quote of the day
+      quoteBox.textContent = QUOTES[(currentDay - 1) % QUOTES.length];
+
       loadState();
       prevBtn.disabled = currentDay <= 1;
       nextBtn.disabled = currentDay >= TOTAL_DAYS;
@@ -303,28 +401,36 @@
       }
     });
 
+    // Events
     prevBtn.addEventListener('click', goPrev);
     nextBtn.addEventListener('click', goNext);
-    entryBox.addEventListener('input', saveState);
-    moodMorning.addEventListener('change', saveState);
-    moodAfternoon.addEventListener('change', saveState);
-    moodEvening.addEventListener('change', saveState);
+
+    [entryBox, affirmation, topTasks, gratitude, eveningReflection].forEach(el => el.addEventListener('input', saveState));
+    [moodMorning, moodAfternoon, moodEvening].forEach(el => el.addEventListener('change', saveState));
+    [habitRead, habitMove, habitWater].forEach(el => el.addEventListener('change', saveState));
 
     init();
 
-    /* ------------------------------------------------------------------
-       NEW ➜ BACKUP & RESTORE LOGIC
-    ------------------------------------------------------------------ */
-
-    // Download backup
+    /* ----------------- BACKUP & RESTORE ------------------ */
     downloadBackup.addEventListener('click', () => {
       const data = {};
       for (let day = 1; day <= TOTAL_DAYS; day++) {
         data[`day-${day}`] = {
           entry        : localStorage.getItem(getStorageKey(day, 'entry')) || '',
+          affirmation  : localStorage.getItem(getStorageKey(day, 'affirmation')) || '',
+          tasks        : localStorage.getItem(getStorageKey(day, 'tasks')) || '',
+          gratitude    : localStorage.getItem(getStorageKey(day, 'gratitude')) || '',
+          reflection   : localStorage.getItem(getStorageKey(day, 'reflection')) || '',
+
           moodMorning  : localStorage.getItem(getStorageKey(day, 'mood-morning')) || '',
           moodAfternoon: localStorage.getItem(getStorageKey(day, 'mood-afternoon')) || '',
-          moodEvening  : localStorage.getItem(getStorageKey(day, 'mood-evening')) || ''
+          moodEvening  : localStorage.getItem(getStorageKey(day, 'mood-evening')) || '',
+
+          habits: {
+            read  : localStorage.getItem(getStorageKey(day, 'habit-read')) === 'true',
+            move  : localStorage.getItem(getStorageKey(day, 'habit-move')) === 'true',
+            water : localStorage.getItem(getStorageKey(day, 'habit-water')) === 'true'
+          }
         };
       }
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -336,10 +442,8 @@
       URL.revokeObjectURL(url);
     });
 
-    // Trigger hidden file input
     loadBackup.addEventListener('click', () => uploadBackup.click());
 
-    // Handle file selection
     uploadBackup.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -351,10 +455,21 @@
           for (const [dayKey, values] of Object.entries(data)) {
             const day = parseInt(dayKey.replace('day-', ''), 10);
             if (day >= 1 && day <= TOTAL_DAYS) {
-              localStorage.setItem(getStorageKey(day, 'entry'), values.entry || '');
+              localStorage.setItem(getStorageKey(day, 'entry'),        values.entry || '');
+              localStorage.setItem(getStorageKey(day, 'affirmation'),  values.affirmation || '');
+              localStorage.setItem(getStorageKey(day, 'tasks'),        values.tasks || '');
+              localStorage.setItem(getStorageKey(day, 'gratitude'),    values.gratitude || '');
+              localStorage.setItem(getStorageKey(day, 'reflection'),   values.reflection || '');
+
               localStorage.setItem(getStorageKey(day, 'mood-morning'), values.moodMorning || '');
               localStorage.setItem(getStorageKey(day, 'mood-afternoon'), values.moodAfternoon || '');
               localStorage.setItem(getStorageKey(day, 'mood-evening'), values.moodEvening || '');
+
+              if (values.habits) {
+                localStorage.setItem(getStorageKey(day, 'habit-read'),  values.habits.read);
+                localStorage.setItem(getStorageKey(day, 'habit-move'),  values.habits.move);
+                localStorage.setItem(getStorageKey(day, 'habit-water'), values.habits.water);
+              }
             }
           }
           alert('✅ Backup loaded successfully!');

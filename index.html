@@ -193,22 +193,32 @@
   <div class="controls">
     <button id="prevBtn">‹ Prev</button>
     <button id="nextBtn">Next ›</button>
+
+    <!-- NEW ➜ backup & restore controls -->
+    <button id="downloadBackup">⬇️ Backup</button>
+    <input type="file" id="uploadBackup" accept=".json" style="display:none;">
+    <button id="loadBackup">⬆️ Load Backup</button>
   </div>
 
   <script>
     const YEAR = 2025;
     const TOTAL_DAYS = ((YEAR % 4 === 0 && YEAR % 100 !== 0) || (YEAR % 400 === 0)) ? 366 : 365;
 
-    const entryBox = document.getElementById('entryBox');
-    const dateHeader = document.getElementById('dateHeader');
-    const pageNumber = document.getElementById('pageNumber');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const themeToggle = document.getElementById('themeToggle');
+    const entryBox       = document.getElementById('entryBox');
+    const dateHeader     = document.getElementById('dateHeader');
+    const pageNumber     = document.getElementById('pageNumber');
+    const prevBtn        = document.getElementById('prevBtn');
+    const nextBtn        = document.getElementById('nextBtn');
+    const themeToggle    = document.getElementById('themeToggle');
 
-    const moodMorning = document.getElementById('moodMorning');
-    const moodAfternoon = document.getElementById('moodAfternoon');
-    const moodEvening = document.getElementById('moodEvening');
+    const moodMorning    = document.getElementById('moodMorning');
+    const moodAfternoon  = document.getElementById('moodAfternoon');
+    const moodEvening    = document.getElementById('moodEvening');
+
+    // NEW ➜ backup controls
+    const downloadBackup = document.getElementById('downloadBackup');
+    const uploadBackup   = document.getElementById('uploadBackup');
+    const loadBackup     = document.getElementById('loadBackup');
 
     let currentDay = 1;
 
@@ -229,10 +239,10 @@
     }
 
     function loadState() {
-      entryBox.value = localStorage.getItem(getStorageKey(currentDay, 'entry')) || '';
-      moodMorning.value = localStorage.getItem(getStorageKey(currentDay, 'mood-morning')) || '';
-      moodAfternoon.value = localStorage.getItem(getStorageKey(currentDay, 'mood-afternoon')) || '';
-      moodEvening.value = localStorage.getItem(getStorageKey(currentDay, 'mood-evening')) || '';
+      entryBox.value   = localStorage.getItem(getStorageKey(currentDay, 'entry')) || '';
+      moodMorning.value  = localStorage.getItem(getStorageKey(currentDay, 'mood-morning')) || '';
+      moodAfternoon.value= localStorage.getItem(getStorageKey(currentDay, 'mood-afternoon')) || '';
+      moodEvening.value  = localStorage.getItem(getStorageKey(currentDay, 'mood-evening')) || '';
     }
 
     function updatePage() {
@@ -276,6 +286,7 @@
       }
     }
 
+    // Theme toggle
     themeToggle.addEventListener('click', () => {
       const current = document.documentElement.getAttribute('data-theme');
       if (current === 'dark') {
@@ -297,6 +308,60 @@
     moodEvening.addEventListener('change', saveState);
 
     init();
+
+    /* ------------------------------------------------------------------
+       NEW ➜ BACKUP & RESTORE LOGIC
+    ------------------------------------------------------------------ */
+
+    // Download backup
+    downloadBackup.addEventListener('click', () => {
+      const data = {};
+      for (let day = 1; day <= TOTAL_DAYS; day++) {
+        data[`day-${day}`] = {
+          entry        : localStorage.getItem(getStorageKey(day, 'entry')) || '',
+          moodMorning  : localStorage.getItem(getStorageKey(day, 'mood-morning')) || '',
+          moodAfternoon: localStorage.getItem(getStorageKey(day, 'mood-afternoon')) || '',
+          moodEvening  : localStorage.getItem(getStorageKey(day, 'mood-evening')) || ''
+        };
+      }
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `journal-backup-${YEAR}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Trigger hidden file input
+    loadBackup.addEventListener('click', () => uploadBackup.click());
+
+    // Handle file selection
+    uploadBackup.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          for (const [dayKey, values] of Object.entries(data)) {
+            const day = parseInt(dayKey.replace('day-', ''), 10);
+            if (day >= 1 && day <= TOTAL_DAYS) {
+              localStorage.setItem(getStorageKey(day, 'entry'), values.entry || '');
+              localStorage.setItem(getStorageKey(day, 'mood-morning'), values.moodMorning || '');
+              localStorage.setItem(getStorageKey(day, 'mood-afternoon'), values.moodAfternoon || '');
+              localStorage.setItem(getStorageKey(day, 'mood-evening'), values.moodEvening || '');
+            }
+          }
+          alert('✅ Backup loaded successfully!');
+          updatePage();
+        } catch (err) {
+          alert('❌ Failed to load backup. Invalid file.');
+        }
+      };
+      reader.readAsText(file);
+    });
   </script>
 </body>
 </html>

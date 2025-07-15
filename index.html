@@ -17,7 +17,7 @@
     [data-theme="dark"] {
       --paper: #1c1c1c; --bg: #000000; --text: #e2e2e2; --text-light: #9e9e9e; --border-color: #3a3a3a; --accent: #4682B4; --shadow: rgba(0,0,0,0.4);
     }
-    
+
     /* --- CHANGE: Updated body font and main container spacing --- */
     body { 
       margin: 0; 
@@ -45,10 +45,10 @@
       transition: opacity 0.2s ease-in-out; 
     }
     main.journal-page--loading { opacity: 0; }
-    
+
     .date-header { text-align: center; font-family: 'Courier New', monospace; font-size: 1.2em; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin: 0; }
     #dailyLog { width: 100%; min-height: 150px; font-size: 1.1em; line-height: 1.7; font-family: inherit; border: none; background: transparent; resize: vertical; outline: none; color: var(--text); padding: 0; overflow-y: hidden; }
-    
+
     .prompts, .trackers-section { border-top: 1px dashed var(--border-color); padding-top: 20px; }
     .prompt-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
     .prompt-group label { font-weight: bold; color: var(--text-light); font-size: 1em; } /* Removed redundant font-family */
@@ -69,7 +69,7 @@
       outline: 2px solid var(--accent);
       border-color: var(--accent);
     }
-    
+
     .mood-trackers { display: flex; flex-direction: column; gap: 15px; }
     .mood-tracker { display: flex; align-items: center; gap: 10px; }
     .mood-tracker .label-container { flex-basis: 160px; font-size: 1.1em; display: flex; align-items: center; gap: 8px;}
@@ -92,20 +92,20 @@
 </head>
 <body>
   <button class="theme-toggle" id="themeToggle">☀️</button>
-  
+
   <main id="journalPage">
     <h1 class="date-header" id="dateHeader">Loading...</h1>
-    
-    <textarea id="dailyLog" placeholder=""></textarea>
-    
+
+    <textarea id="dailyLog" placeholder="Start writing..."></textarea>
+
     <section class="prompts">
         <div class="prompt-group">
             <label for="goal">🎯 Morning Goal</label>
-            <textarea id="goal" rows="1" placeholder=""></textarea>
+            <textarea id="goal" rows="1" placeholder="What's your #1 objective for today?"></textarea>
         </div>
         <div class="prompt-group">
             <label for="eveningNote">📝 End-of-Day Thoughts</label>
-            <textarea id="eveningNote" rows="1" placeholder=""></textarea>
+            <textarea id="eveningNote" rows="1" placeholder="A note on how the day went..."></textarea>
         </div>
     </section>
 
@@ -115,24 +115,24 @@
         <div class="mood-tracker">
             <div class="label-container"><span class="mood-emoji" id="morningMoodEmoji"></span><label for="morningMood">Morning</label></div>
             <select id="morningMood">
-                <option value="" data-emoji="">...</option><option value="Great" data-emoji="😊">Great</option><option value="Good" data-emoji="🙂">Good</option><option value="Meh" data-emoji="😐">Meh</option><option value="Tired" data-emoji="😴">Tired</option><option value="Anxious" data-emoji="😟">Anxious</option>
+                <option value="" data-emoji="">Select...</option><option value="Great" data-emoji="😊">Great</option><option value="Good" data-emoji="🙂">Good</option><option value="Meh" data-emoji="😐">Meh</option><option value="Tired" data-emoji="😴">Tired</option><option value="Anxious" data-emoji="😟">Anxious</option>
             </select>
         </div>
         <div class="mood-tracker">
             <div class="label-container"><span class="mood-emoji" id="afternoonMoodEmoji"></span><label for="afternoonMood">Afternoon</label></div>
             <select id="afternoonMood">
-                <option value="" data-emoji="">...</option><option value="Productive" data-emoji="⚡">Productive</option><option value="Focused" data-emoji="🎯">Focused</option><option value="Distracted" data-emoji="😵">Distracted</option><option value="Tired" data-emoji="😴">Tired</option><option value="Stressed" data-emoji="😫">Stressed</option>
+                <option value="" data-emoji="">Select...</option><option value="Productive" data-emoji="⚡">Productive</option><option value="Focused" data-emoji="🎯">Focused</option><option value="Distracted" data-emoji="😵">Distracted</option><option value="Tired" data-emoji="😴">Tired</option><option value="Stressed" data-emoji="😫">Stressed</option>
             </select>
         </div>
         <div class="mood-tracker">
             <div class="label-container"><span class="mood-emoji" id="eveningMoodEmoji"></span><label for="eveningMood">Evening</label></div>
             <select id="eveningMood">
-                <option value="" data-emoji="">...</option><option value="Happy" data-emoji="😄">Happy</option><option value="Content" data-emoji="😌">Content</option><option value="Relaxed" data-emoji="🧘">Relaxed</option><option value="Tired" data-emoji="😴">Tired</option><option value="Sad" data-emoji="😢">Sad</option>
+                <option value="" data-emoji="">Select...</option><option value="Happy" data-emoji="😄">Happy</option><option value="Content" data-emoji="😌">Content</option><option value="Relaxed" data-emoji="🧘">Relaxed</option><option value="Tired" data-emoji="😴">Tired</option><option value="Sad" data-emoji="😢">Sad</option>
             </select>
         </div>
       </div>
     </section>
-    
+
     <footer id="pageNumber"></footer>
   </main>
 
@@ -151,6 +151,7 @@
   </div>
    <p style="font-size: 0.8em; color: #888; text-align: center; max-width: 600px;">
     Your journal is saved in this browser's local storage.
+    Please use the <strong>Backup</strong> button regularly to prevent data loss.
     Please use the <strong>Backup ⚙️</strong> button regularly to prevent data loss.
   </p>
 <script>
@@ -160,7 +161,7 @@ const app = {
   currentDay: 1,
   dom: {},
   config: {},
-  
+
   init() { /* ... unchanged ... */ },
   cacheDom() { /* ... unchanged ... */ },
   initConfig() { /* ... unchanged ... */ },

@@ -190,15 +190,18 @@
     <div class="page-number" id="pageNumber"></div>
   </div>
 
-  <div class="controls">
-    <button id="prevBtn">‹ Prev</button>
-    <button id="nextBtn">Next ›</button>
+<!-- Navigation buttons -->
+<div class="controls">
+  <button id="prevBtn">‹ Prev</button>
+  <button id="nextBtn">Next ›</button>
+</div>
 
-    <!-- NEW ➜ backup & restore controls -->
-    <button id="downloadBackup">⬇️ Backup</button>
-    <input type="file" id="uploadBackup" accept=".json" style="display:none;">
-    <button id="loadBackup">⬆️ Load Backup</button>
-  </div>
+<!-- Backup buttons on a new line -->
+<div class="controls">
+  <button id="downloadBackup">⬇️ Backup</button>
+  <input type="file" id="uploadBackup" accept=".json" style="display:none;">
+  <button id="loadBackup">⬆️ Load Backup</button>
+</div>
 
   <script>
     const YEAR = 2025;

@@ -31,7 +31,7 @@
       min-height: 100vh; 
     }
 
-    /* --- CHANGE: Added Tab Navigation --- */
+    /* --- Tab Navigation --- */
     .tab-navigation {
       display: flex;
       gap: 5px;
@@ -58,7 +58,7 @@
       border-bottom: 1px solid var(--paper); /* Hides the top border of the content pane */
     }
 
-    /* --- CHANGE: Main content is now a generic tab content container --- */
+    /* --- Main content container --- */
     .tab-content { 
       width: 100%; 
       max-width: 600px; 
@@ -79,7 +79,7 @@
 
     .date-header { text-align: center; font-family: 'Courier New', monospace; font-size: 1.2em; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin: 0; }
     
-    /* --- CHANGE: Grouped styles for both textareas --- */
+    /* --- Grouped styles for textareas --- */
     #dailyLog, #globalNotes { 
       width: 100%; 
       min-height: 150px; 
@@ -110,6 +110,45 @@
     .mood-tracker .label-container { flex-basis: 160px; font-size: 1.1em; display: flex; align-items: center; gap: 8px;}
     .mood-emoji { font-size: 1.2em; display: inline-block; width: 24px; text-align: center;}
     .mood-tracker select { flex-grow: 1; font-size: 1em; padding: 5px; border-radius: 4px; border: 1px solid var(--border-color); background-color: var(--paper); color: var(--text); font-family: inherit; }
+    
+    /* --- NEW: Energy Slider Styles --- */
+    .energy-slider {
+      flex-grow: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 8px;
+      background: var(--bg);
+      outline: none;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .energy-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      cursor: pointer;
+      border-radius: 50%;
+    }
+    .energy-slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      cursor: pointer;
+      border-radius: 50%;
+      border: none;
+    }
+    .energy-value {
+      font-family: 'Courier New', monospace;
+      font-size: 1.2em;
+      font-weight: bold;
+      min-width: 20px;
+      text-align: center;
+      color: var(--text-light);
+    }
+    
     footer { font-size: 0.9em; text-align: right; color: #888; margin-top: 10px; }
     .controls { margin-top: 20px; display: flex; gap: 16px; justify-content: center; align-items: center; }
     button { background: var(--accent); color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer; transition: background 0.3s, opacity 0.3s; font-family: inherit; }
@@ -128,13 +167,11 @@
 <body>
   <button class="theme-toggle" id="themeToggle">☀️</button>
 
-  <!-- CHANGE: Added Tab Navigation -->
   <div class="tab-navigation">
     <button id="dailyTabBtn" class="tab-button active">Daily</button>
     <button id="globalTabBtn" class="tab-button">Notes</button>
   </div>
 
-  <!-- CHANGE: This is now the "Daily" tab content pane -->
   <main id="dailyView" class="tab-content active">
     <h1 class="date-header" id="dateHeader">Loading...</h1>
 
@@ -172,11 +209,32 @@
             </select>
         </div>
       </div>
+
+      <!-- NEW: Energy Tracker Section -->
+      <div class="energy-tracker-container" style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color);">
+        <div class="prompt-group" style="margin-bottom: 10px; gap: 4px;">
+            <label style="font-size: 1.1em; color: var(--text); font-weight: bold;">🌡️ Track Energy, Not Just Mood</label>
+            <p style="font-size: 0.9em; line-height: 1.5; color: var(--text-light); margin: 0;">A big piece of this is probably low energy + emotional fatigue. You may be burning out on ideas, effort, even self-pressure. Add a simple energy slider (1–5), morning and evening. Start seeing what affects your energy, not just your emotions.</p>
+        </div>
+        <div class="mood-trackers">
+          <div class="mood-tracker">
+              <div class="label-container"><span class="mood-emoji">🌅</span><label for="morningEnergy">Morning Energy</label></div>
+              <input type="range" id="morningEnergy" min="1" max="5" value="3" class="energy-slider">
+              <span class="energy-value" id="morningEnergyValue">3</span>
+          </div>
+          <div class="mood-tracker">
+              <div class="label-container"><span class="mood-emoji">🌃</span><label for="eveningEnergy">Evening Energy</label></div>
+              <input type="range" id="eveningEnergy" min="1" max="5" value="3" class="energy-slider">
+              <span class="energy-value" id="eveningEnergyValue">3</span>
+          </div>
+        </div>
+      </div>
+      <!-- End of Energy Tracker Section -->
+      
     </section>
     <footer id="pageNumber"></footer>
   </main>
 
-  <!-- CHANGE: Added the "Global" tab content pane -->
   <main id="globalView" class="tab-content">
     <h1 class="date-header">Global Notes</h1>
     <textarea id="globalNotes" placeholder="Notes that persist across all days..."></textarea>
@@ -201,7 +259,7 @@
   </p>
 
 <script>
-// --- CHANGE: The JavaScript has been updated to support the new Global tab ---
+// --- The JavaScript has been updated to support the new Energy Sliders ---
 const app = {
   YEAR: 2025,
   currentDay: 1,
@@ -214,7 +272,7 @@ const app = {
     this.initConfig();
     this.bindEvents();
     this.loadTheme();
-    this.loadGlobalNotes(); // Load persistent notes
+    this.loadGlobalNotes();
     this.autoGrow(this.dom.globalNotes);
     this.loadInitialPage();
   },
@@ -232,6 +290,7 @@ const app = {
       pageNumber: document.getElementById('pageNumber'),
       textareas: document.querySelectorAll('#dailyView textarea'),
       moodSelectors: document.querySelectorAll('.mood-tracker select'),
+      energySliders: document.querySelectorAll('.energy-slider'), // NEW
       // Controls
       controls: document.querySelector('.controls'),
       prevBtn: document.getElementById('prevBtn'),
@@ -255,6 +314,8 @@ const app = {
       morningMood: { type: 'value', el: document.getElementById('morningMood') },
       afternoonMood: { type: 'value', el: document.getElementById('afternoonMood') },
       eveningMood: { type: 'value', el: document.getElementById('eveningMood') },
+      morningEnergy: { type: 'value', el: document.getElementById('morningEnergy') }, // NEW
+      eveningEnergy: { type: 'value', el: document.getElementById('eveningEnergy') }, // NEW
     };
   },
 
@@ -277,6 +338,9 @@ const app = {
       if (e.target.id && this.config[e.target.id]) {
         this.saveState();
         if (e.target.tagName === 'TEXTAREA') this.autoGrow(e.target);
+        if (e.target.classList.contains('energy-slider')) { // NEW
+            this.updateEnergyValueDisplay(e.target);
+        }
       }
     });
     this.dom.dailyView.addEventListener('change', (e) => {
@@ -315,7 +379,9 @@ const app = {
   saveState() {
     try {
       for (const [key, field] of Object.entries(this.config)) {
-        localStorage.setItem(this.getStorageKey(this.currentDay, key), field.el[field.type]);
+        // For sliders, ensure a default value is saved if one hasn't been loaded yet.
+        const value = field.el[field.type] || (field.el.type === 'range' ? '3' : '');
+        localStorage.setItem(this.getStorageKey(this.currentDay, key), value);
       }
       localStorage.setItem('journal-v6-last-opened', this.currentDay);
     } catch (e) { console.error("Failed to save state.", e); }
@@ -323,7 +389,12 @@ const app = {
   loadState() {
     for (const [key, field] of Object.entries(this.config)) {
       const value = localStorage.getItem(this.getStorageKey(this.currentDay, key));
-      field.el[field.type] = value || (field.type === 'checked' ? false : '');
+      // For sliders, provide a default value if nothing is stored.
+      if(field.el.type === 'range') {
+        field.el[field.type] = value || '3';
+      } else {
+        field.el[field.type] = value || (field.type === 'checked' ? false : '');
+      }
     }
   },
 
@@ -342,6 +413,7 @@ const app = {
     this.loadState();
     this.dom.textareas.forEach(el => this.autoGrow(el));
     this.dom.moodSelectors.forEach(el => this.updateMoodEmoji(el));
+    this.dom.energySliders.forEach(el => this.updateEnergyValueDisplay(el)); // NEW
     this.dom.prevBtn.disabled = this.currentDay <= 1;
     this.dom.nextBtn.disabled = this.currentDay >= this.TOTAL_DAYS;
   },
@@ -368,11 +440,20 @@ const app = {
   },
 
   autoGrow(element) { if (!element) return; element.style.height = 'auto'; element.style.height = (element.scrollHeight) + 'px'; },
+  
   updateMoodEmoji(selectElement) {
     const emojiSpan = document.getElementById(`${selectElement.id}Emoji`);
     if (!emojiSpan) return;
     const selectedOption = selectElement.options[selectElement.selectedIndex];
     emojiSpan.textContent = selectedOption.dataset.emoji || '';
+  },
+
+  // NEW: Function to update the number next to the energy slider
+  updateEnergyValueDisplay(sliderElement) {
+    const valueSpan = document.getElementById(`${sliderElement.id}Value`);
+    if (valueSpan) {
+        valueSpan.textContent = sliderElement.value;
+    }
   },
 
   toggleTheme() {
@@ -398,12 +479,10 @@ const app = {
 
   downloadBackup() {
     const data = {};
-    // Add global notes to backup
     const globalNotesContent = localStorage.getItem(this.getGlobalStorageKey());
     if (globalNotesContent) {
         data.globalNotes = globalNotesContent;
     }
-    // Add daily entries to backup
     for (let i = 1; i <= this.TOTAL_DAYS; i++) {
       const dayData = {};
       let hasData = false;
@@ -437,7 +516,6 @@ const app = {
           e.target.value = '';
           return;
         }
-        // Load global notes from backup
         if (data.globalNotes) {
             localStorage.setItem(this.getGlobalStorageKey(), data.globalNotes);
             this.dom.globalNotes.value = data.globalNotes;
@@ -446,7 +524,6 @@ const app = {
             localStorage.removeItem(this.getGlobalStorageKey());
             this.dom.globalNotes.value = '';
         }
-        // Load daily entries from backup
         for (const [dayKey, dayData] of Object.entries(data)) {
           if (dayKey.startsWith('day-')) {
              const day = dayKey.split('-')[1];

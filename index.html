@@ -12,6 +12,7 @@
       --text-light: #555;
       --border-color: #d1d1d1;
       --accent: #b48ead;
+      --shadow: rgba(0,0,0,0.1);
     }
     [data-theme="dark"] {
       --paper: #282c34;
@@ -20,13 +21,30 @@
       --text-light: #abb2bf;
       --border-color: #4c566a;
       --accent: #88c0d0;
+      --shadow: rgba(0,0,0,0.2);
     }
-    body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Georgia', serif; /* Changed to serif for a classic journal feel */ display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; min-height: 100vh; transition: background 0.3s, color 0.3s; }
-    main { width: 100%; max-width: 600px; background: var(--paper); padding: 25px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 25px; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Georgia', serif; display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; min-height: 100vh; transition: background 0.3s, color 0.3s; }
+    
+    main { 
+      width: 100%; 
+      max-width: 600px; 
+      background: var(--paper); 
+      padding: 25px; 
+      border-radius: 8px; 
+      box-shadow: 0 4px 20px var(--shadow); 
+      display: flex; 
+      flex-direction: column; 
+      gap: 25px; 
+      /* NEW: Added for smooth navigation */
+      transition: opacity 0.2s ease-in-out; 
+    }
+    /* NEW: Class to hide the content during loading */
+    main.journal-page--loading {
+      opacity: 0;
+    }
     
     .date-header { text-align: center; font-family: 'Courier New', monospace; font-size: 1.2em; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin: 0 0 10px 0; }
     
-    /* The main free-form text area */
     #dailyLog {
       width: 100%;
       min-height: 150px;
@@ -35,67 +53,44 @@
       font-family: inherit;
       border: none;
       background: transparent;
-      resize: vertical;
+      resize: vertical; /* Allow manual resizing */
       outline: none;
       color: var(--text);
       padding: 0;
+      overflow-y: hidden; /* Hide scrollbar until needed */
     }
 
-    /* Section for structured prompts */
-    .prompts, .trackers-section {
-      border-top: 1px dashed var(--border-color);
-      padding-top: 20px;
-    }
-    .prompt-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-    .prompt-group label {
-      font-weight: bold;
-      color: var(--text-light);
-      font-size: 1em;
-      font-family: sans-serif; /* Use sans-serif for UI elements */
-    }
-    .prompt-group input[type="text"] {
-      font-family: inherit;
-      font-size: 1.05em;
-      padding: 8px;
-      border: 1px solid var(--border-color);
-      background: var(--bg);
-      border-radius: 4px;
-      color: var(--text);
-    }
-    .prompt-group input[type="text"]:focus {
-        outline: 2px solid var(--accent);
-        border-color: var(--accent);
-    }
+    .prompts, .trackers-section { border-top: 1px dashed var(--border-color); padding-top: 20px; }
+    .prompt-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .prompt-group label { font-weight: bold; color: var(--text-light); font-size: 1em; font-family: sans-serif; }
+    .prompt-group input[type="text"] { font-family: inherit; font-size: 1.05em; padding: 8px; border: 1px solid var(--border-color); background: var(--bg); border-radius: 4px; color: var(--text); }
+    .prompt-group input[type="text"]:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
 
-    /* Mood Trackers - Inspired by your screenshot */
     .mood-trackers { display: flex; flex-direction: column; gap: 15px; }
     .mood-tracker { display: flex; align-items: center; gap: 10px; }
-    .mood-tracker label { font-size: 1.1em; flex-basis: 150px; }
+    /* NEW: Added a container for the label + emoji */
+    .mood-tracker .label-container { flex-basis: 160px; font-size: 1.1em; display: flex; align-items: center; gap: 8px;}
+    /* NEW: Style for the emoji span */
+    .mood-emoji { font-size: 1.2em; display: inline-block; width: 24px; text-align: center;}
     .mood-tracker select { flex-grow: 1; font-size: 1em; padding: 5px; border-radius: 4px; border: 1px solid var(--border-color); background-color: var(--paper); color: var(--text); }
     
     footer { font-size: 0.9em; text-align: right; color: #888; margin-top: 10px; }
     .controls { margin-top: 20px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-    button { background: var(--accent); color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer; transition: background 0.3s; font-family: sans-serif; }
+    button { background: var(--accent); color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer; transition: background 0.3s, opacity 0.3s; font-family: sans-serif; }
     button:hover:not(:disabled) { opacity: 0.85; }
-    button:disabled { background: #a99484; cursor: not-allowed; }
+    button:disabled { background: #999; opacity: 0.7; cursor: not-allowed; }
+    [data-theme="dark"] button:disabled { background: #555; }
     .theme-toggle { position: fixed; top: 10px; right: 10px; font-size: 0.9em; z-index: 10; }
   </style>
 </head>
 <body>
   <button class="theme-toggle" id="themeToggle">☀️</button>
   
-  <main class="journal-page">
+  <main id="journalPage">
     <h1 class="date-header" id="dateHeader">Loading...</h1>
     
-    <!-- The main, unstructured writing area -->
     <textarea id="dailyLog" placeholder="Start writing..."></textarea>
     
-    <!-- A simple, non-intrusive section for key prompts -->
     <section class="prompts">
         <div class="prompt-group">
             <label for="goal">🎯 Morning Goal</label>
@@ -107,25 +102,24 @@
         </div>
     </section>
 
-    <!-- Mood trackers, as seen in your screenshot -->
     <section class="trackers-section">
       <div class="mood-trackers">
         <div class="mood-tracker">
-            <label for="morningMood">🌅 Morning Mood</label>
+            <div class="label-container"><span class="mood-emoji" id="morningMoodEmoji"></span><label for="morningMood">Morning</label></div>
             <select id="morningMood">
-                <option value="">Select...</option><option value="Great">😊 Great</option><option value="Good">🙂 Good</option><option value="Meh">😐 Meh</option><option value="Tired">😴 Tired</option><option value="Anxious">😟 Anxious</option>
+                <option value="" data-emoji="">Select...</option><option value="Great" data-emoji="😊">Great</option><option value="Good" data-emoji="🙂">Good</option><option value="Meh" data-emoji="😐">Meh</option><option value="Tired" data-emoji="😴">Tired</option><option value="Anxious" data-emoji="😟">Anxious</option>
             </select>
         </div>
         <div class="mood-tracker">
-            <label for="afternoonMood">🏞️ Afternoon Mood</label>
+            <div class="label-container"><span class="mood-emoji" id="afternoonMoodEmoji"></span><label for="afternoonMood">Afternoon</label></div>
             <select id="afternoonMood">
-                <option value="">Select...</option><option value="Productive">⚡ Productive</option><option value="Focused">🎯 Focused</option><option value="Distracted">😵 Distracted</option><option value="Tired">😴 Tired</option><option value="Stressed">😫 Stressed</option>
+                <option value="" data-emoji="">Select...</option><option value="Productive" data-emoji="⚡">Productive</option><option value="Focused" data-emoji="🎯">Focused</option><option value="Distracted" data-emoji="😵">Distracted</option><option value="Tired" data-emoji="😴">Tired</option><option value="Stressed" data-emoji="😫">Stressed</option>
             </select>
         </div>
         <div class="mood-tracker">
-            <label for="eveningMood">🌙 Evening Mood</label>
+            <div class="label-container"><span class="mood-emoji" id="eveningMoodEmoji"></span><label for="eveningMood">Evening</label></div>
             <select id="eveningMood">
-                <option value="">Select...</option><option value="Happy">😄 Happy</option><option value="Content">😌 Content</option><option value="Relaxed">🧘 Relaxed</option><option value="Tired">😴 Tired</option><option value="Sad">😢 Sad</option>
+                <option value="" data-emoji="">Select...</option><option value="Happy" data-emoji="😄">Happy</option><option value="Content" data-emoji="😌">Content</option><option value="Relaxed" data-emoji="🧘">Relaxed</option><option value="Tired" data-emoji="😴">Tired</option><option value="Sad" data-emoji="😢">Sad</option>
             </select>
         </div>
       </div>
@@ -147,7 +141,6 @@
 <script>
 const app = {
   YEAR: 2025,
-  TOTAL_DAYS: 365,
   currentDay: 1,
   dom: {},
   config: {},
@@ -155,7 +148,7 @@ const app = {
   init() {
     this.TOTAL_DAYS = ((this.YEAR % 4 === 0 && this.YEAR % 100 !== 0) || (this.YEAR % 400 === 0)) ? 366 : 365;
     this.cacheDom();
-    this.initConfig(); // Reconfigured for the new, simpler layout
+    this.initConfig();
     this.bindEvents();
     this.loadTheme();
     this.loadInitialPage();
@@ -163,6 +156,7 @@ const app = {
   
   cacheDom() {
     this.dom = {
+      mainPage: document.getElementById('journalPage'), // Main container for transitions
       dateHeader: document.getElementById('dateHeader'),
       pageNumber: document.getElementById('pageNumber'),
       prevBtn: document.getElementById('prevBtn'),
@@ -171,12 +165,13 @@ const app = {
       downloadBtn: document.getElementById('downloadBackup'),
       uploadBtn: document.getElementById('uploadBackup'),
       loadBtn: document.getElementById('loadBackup'),
+      textareas: document.querySelectorAll('textarea'),
+      moodSelectors: document.querySelectorAll('.mood-tracker select'),
     };
   },
   
   initConfig() {
       this.config = {
-          // New, simplified structure
           dailyLog:      { type: 'value', el: document.getElementById('dailyLog') },
           goal:          { type: 'value', el: document.getElementById('goal') },
           lessonLearned: { type: 'value', el: document.getElementById('lessonLearned') },
@@ -194,84 +189,128 @@ const app = {
     this.dom.loadBtn.addEventListener('click', () => this.dom.uploadBtn.click());
     this.dom.uploadBtn.addEventListener('change', (e) => this.loadBackup(e));
     
-    Object.values(this.config).forEach(field => {
-      const eventType = (field.el.tagName === 'SELECT') ? 'change' : 'input';
-      field.el.addEventListener(eventType, () => this.saveState());
+    // EFFICIENT: Use event delegation on the main container
+    this.dom.mainPage.addEventListener('input', (e) => {
+        if (e.target.id && this.config[e.target.id]) {
+            this.saveState();
+            if(e.target.tagName === 'TEXTAREA') this.autoGrow(e.target);
+        }
+    });
+    this.dom.mainPage.addEventListener('change', (e) => {
+        if (e.target.tagName === 'SELECT') {
+            this.saveState();
+            this.updateMoodEmoji(e.target);
+        }
     });
   },
   
-  getStorageKey(day, key) { return `journal-v4-${this.YEAR}-day-${day}-${key}`; }, // Version up!
+  // Use a new version to avoid conflicts with old data
+  getStorageKey(day, key) { return `journal-v5-${this.YEAR}-day-${day}-${key}`; },
   
-  saveState() {
-    try {
-      for (const [key, field] of Object.entries(this.config)) {
-        localStorage.setItem(this.getStorageKey(this.currentDay, key), field.el[field.type]);
-      }
-      localStorage.setItem('journal-v4-last-opened', this.currentDay);
-    } catch (e) { console.error("Failed to save state.", e); }
-  },
+  saveState() { /* ... unchanged ... */ },
   
   loadState() {
     for (const [key, field] of Object.entries(this.config)) {
       const value = localStorage.getItem(this.getStorageKey(this.currentDay, key));
-      field.el[field.type] = value || '';
+      field.el[field.type] = value || (field.type === 'checked' ? false : '');
     }
   },
   
-  updatePage() {
+  updatePageUI() {
     const date = new Date(this.YEAR, 0, this.currentDay);
     this.dom.dateHeader.textContent = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
     this.dom.pageNumber.textContent = `Day ${this.currentDay} / ${this.TOTAL_DAYS}`;
     this.loadState();
+    
+    // ROBUST: Update all UI elements after loading state
+    this.dom.textareas.forEach(el => this.autoGrow(el));
+    this.dom.moodSelectors.forEach(el => this.updateMoodEmoji(el));
+
     this.dom.prevBtn.disabled = this.currentDay <= 1;
     this.dom.nextBtn.disabled = this.currentDay >= this.TOTAL_DAYS;
   },
   
+  // NON-GLITCHY NAVIGATION
   navigate(direction) {
-    this.saveState();
-    const newDay = this.currentDay + direction;
-    if (newDay >= 1 && newDay <= this.TOTAL_DAYS) {
-      this.currentDay = newDay;
-      this.updatePage();
+    if ((direction === -1 && this.currentDay <= 1) || (direction === 1 && this.currentDay >= this.TOTAL_DAYS)) {
+        return; // Don't do anything if at the edge
     }
+    this.saveState();
+    this.dom.mainPage.classList.add('journal-page--loading'); // Fade out
+
+    // Wait for fade-out to complete before changing content
+    setTimeout(() => {
+        this.currentDay += direction;
+        this.updatePageUI(); // Update content while invisible
+        this.dom.mainPage.classList.remove('journal-page--loading'); // Fade back in
+    }, 200); // Should match CSS transition time
   },
   
   loadInitialPage() {
-    const saved = parseInt(localStorage.getItem('journal-v4-last-opened'), 10);
+    const saved = parseInt(localStorage.getItem('journal-v5-last-opened'), 10);
     const today = new Date();
     const start = new Date(this.YEAR, 0, 1);
     const dayOfYear = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1;
     
     let initialDay = (today.getFullYear() === this.YEAR) ? dayOfYear : 1;
     this.currentDay = !isNaN(saved) ? saved : initialDay;
-    this.updatePage();
-  },
-  
-  toggleTheme() {
-    const isDark = document.documentElement.hasAttribute('data-theme');
-    if (isDark) {
-      document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('journal-theme', 'light');
-      this.dom.themeToggle.textContent = '🌙';
-    } else {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('journal-theme', 'dark');
-      this.dom.themeToggle.textContent = '☀️';
-    }
-  },
-  
-  loadTheme() {
-    if (localStorage.getItem('journal-theme') === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      this.dom.themeToggle.textContent = '☀️';
-    } else {
-      this.dom.themeToggle.textContent = '🌙';
-    }
+    
+    this.updatePageUI();
   },
 
-  downloadBackup() { /* Unchanged from previous version, will work automatically with new config */ },
-  loadBackup(e) { /* Unchanged from previous version, will work automatically with new config */ },
+  // ROBUST: Handles resizing correctly
+  autoGrow(element) {
+    if (!element) return;
+    element.style.height = 'auto'; // Reset height
+    element.style.height = (element.scrollHeight) + 'px'; // Set to content height
+  },
+  
+  // NEW: Provides instant visual feedback for mood selectors
+  updateMoodEmoji(selectElement) {
+    const emojiSpan = document.getElementById(`${selectElement.id}Emoji`);
+    if (!emojiSpan) return;
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    emojiSpan.textContent = selectedOption.dataset.emoji || '';
+  },
+  
+  toggleTheme() { /* ... unchanged ... */ },
+  loadTheme() { /* ... unchanged ... */ },
+  downloadBackup() { /* ... unchanged ... */ },
+  loadBackup(e) { /* ... unchanged ... */ }
 };
+
+// Simplified unchanged functions for brevity
+app.saveState = function() {
+  try {
+    for (const [key, field] of Object.entries(this.config)) {
+      localStorage.setItem(this.getStorageKey(this.currentDay, key), field.el[field.type]);
+    }
+    localStorage.setItem('journal-v5-last-opened', this.currentDay);
+  } catch (e) { console.error("Failed to save state.", e); }
+};
+app.toggleTheme = function() {
+  const isDark = document.documentElement.hasAttribute('data-theme');
+  if (isDark) {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('journal-theme', 'light');
+    this.dom.themeToggle.textContent = '🌙';
+  } else {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('journal-theme', 'dark');
+    this.dom.themeToggle.textContent = '☀️';
+  }
+};
+app.loadTheme = function() {
+  if (localStorage.getItem('journal-theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    this.dom.themeToggle.textContent = '☀️';
+  } else {
+    this.dom.themeToggle.textContent = '🌙';
+  }
+};
+app.downloadBackup = function() { const data = {}; for (let i = 1; i <= this.TOTAL_DAYS; i++) { const dayData = {}; let hasData = false; for (const key of Object.keys(this.config)) { const value = localStorage.getItem(this.getStorageKey(i, key)); if (value !== null && value !== '') { dayData[key] = value; hasData = true; } } if (hasData) { data[`day-${i}`] = dayData; } } const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `journal-backup-${this.YEAR}.json`; a.click(); URL.revokeObjectURL(url); };
+app.loadBackup = function(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (event) => { try { const data = JSON.parse(event.target.result); if (!confirm('This will overwrite existing data. Are you sure?')) return; for (const [dayKey, dayData] of Object.entries(data)) { const day = dayKey.split('-')[1]; for (const [fieldKey, value] of Object.entries(dayData)) { if (this.config[fieldKey]) localStorage.setItem(this.getStorageKey(day, fieldKey), value); } } alert('Backup loaded successfully!'); this.updatePageUI(); } catch (error) { alert('Failed to load backup file. It might be corrupted.'); console.error(error); } }; reader.readAsText(file); };
+
 
 app.init();
 </script>

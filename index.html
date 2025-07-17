@@ -74,7 +74,8 @@
     .schedule-table thead th { background: var(--bg); color: var(--text); font-weight: bold; font-size: 1em; text-align: center; padding: 8px 12px; }
     .schedule-table tbody th { width: 90px; text-align: center; vertical-align: middle; font-weight: normal; color: var(--text-light); font-size: 0.9em; }
     .schedule-table tbody tr:last-child th, .schedule-table tbody tr:last-child td { border-bottom: none; }
-    .schedule-table td { padding: 4px 6px; vertical-align: top; }
+    /* --- [FIX #1] --- Increased padding in the table cell for a larger click target */
+    .schedule-table td { padding: 6px 12px; vertical-align: top; }
     .time-slot { padding: 6px 8px; }
     .time-slot.current { background-color: var(--accent); color: white; border-radius: 4px; font-weight: bold; display: inline-block; }
     .activity-input {
@@ -90,7 +91,7 @@
   </style>
 </head>
 <body>
-  <!-- The HTML body is also unchanged -->
+  <!-- The HTML body is unchanged -->
   <button class="theme-toggle" id="themeToggle">☀️</button>
   <div class="tab-navigation">
     <button id="dailyTabBtn" class="tab-button active">Daily</button>
@@ -187,7 +188,6 @@
   </p>
 
 <script>
-// --- [UPDATED SCRIPT] ---
 const app = {
   YEAR: 2025,
   currentDay: 1,
@@ -283,7 +283,6 @@ const app = {
       this.saveGlobalNotes();
       this.autoGrow(e.target);
     });
-    // This now correctly calls the fixed autoGrow function
     this.dom.scheduleView.addEventListener('input', (e) => {
         if (e.target.classList.contains('activity-input')) {
             this.saveScheduleActivity(e.target);
@@ -347,7 +346,7 @@ const app = {
           const textarea = this.dom.scheduleTable.querySelector(`[data-hour="${hour}"]`);
           if (textarea) {
               textarea.value = localStorage.getItem(this.getStorageKey(this.currentDay, `activity-${hour}`)) || '';
-               this.autoGrow(textarea); // Crucially, auto-grow on load
+               this.autoGrow(textarea);
           }
       }
   },
@@ -367,7 +366,7 @@ const app = {
 
   navigate(direction) {
     if ((direction === -1 && this.currentDay <= 1) || (direction === 1 && this.currentDay >= this.TOTAL_DAYS)) return;
-    this.saveState(); // Save current day before navigating
+    this.saveState();
     this.dom.dailyView.classList.add('journal-page--loading');
     setTimeout(() => {
       this.currentDay += direction;
@@ -386,13 +385,9 @@ const app = {
     this.updatePageUI();
   },
 
-  // --- [THE FIX] This is the new, reliable autoGrow function ---
   autoGrow(element) {
     if (!element) return;
-    // 1. Temporarily set a minimal height. This is the key step that allows the element to shrink.
     element.style.height = '1px';
-    // 2. Set the height to the scrollHeight, which is the true height of the content.
-    // The CSS min-height will prevent it from becoming smaller than a single line.
     element.style.height = (element.scrollHeight) + 'px';
   },
 
@@ -436,7 +431,6 @@ const app = {
     for (let i = 1; i <= this.TOTAL_DAYS; i++) {
       const dayData = {};
       let hasData = false;
-      // Include all config keys AND schedule keys
       const allKeys = [...Object.keys(this.config), ...Object.keys(this.schedule).filter(k => k.startsWith('activity-'))];
       for (const key of allKeys) {
         const value = localStorage.getItem(this.getStorageKey(i, key));
@@ -467,7 +461,6 @@ const app = {
         if (!confirm('This will overwrite existing data. Are you sure?')) {
           e.target.value = ''; return;
         }
-        // Clear old data to prevent conflicts
         Object.keys(localStorage).filter(k => k.startsWith('journal-v8-')).forEach(k => localStorage.removeItem(k));
 
         if (data.globalNotes) {
@@ -513,24 +506,37 @@ const app = {
     }
   },
 
+  // --- [FIX #2] --- Replaced the progress bar logic with a more robust version.
   updateDayProgress() {
     const { startTime, endTime } = this.schedule;
     const now = new Date();
-    const start = new Date(this.YEAR, 0, 1);
-    const dayOfYear = Math.floor((now - start) / (1000 * 60 * 60 * 24)) + 1;
 
-    if (this.currentDay !== dayOfYear || now.getFullYear() !== this.YEAR) {
-       this.dom.dayProgressBar.style.width = '0%';
-       this.dom.progressText.textContent = `0%`;
-       return;
+    // Determine the day number for today in the real world.
+    const startOfRealYear = new Date(now.getFullYear(), 0, 1);
+    const realDayOfYear = Math.floor((now - startOfRealYear) / (1000 * 60 * 60 * 24)) + 1;
+
+    // The progress bar only shows progress if the journal's year is the current year,
+    // AND the day being viewed is the current day.
+    if (this.YEAR !== now.getFullYear() || this.currentDay !== realDayOfYear) {
+        this.dom.dayProgressBar.style.width = '0%';
+        this.dom.progressText.textContent = `0%`;
+        return;
     }
+
+    // If the checks pass, calculate the percentage of the scheduled day that has passed.
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
     const totalHours = endTime - startTime;
+
+    // Calculate progress based on current time within the scheduled hours.
     let hoursPassed = Math.max(0, currentHour - startTime);
-    if (currentHour > endTime) hoursPassed = totalHours;
+    if (currentHour >= endTime) {
+        hoursPassed = totalHours; // Cap at 100% if the day's schedule is over
+    }
+
     const totalProgress = hoursPassed + (currentMinute / 60);
-    let percentageComplete = Math.max(0, Math.min(100, (totalProgress / totalHours) * 100));
+    const percentageComplete = Math.max(0, Math.min(100, (totalProgress / totalHours) * 100));
+
     this.dom.dayProgressBar.style.width = `${percentageComplete}%`;
     this.dom.progressText.textContent = `${Math.round(percentageComplete)}%`;
   }
